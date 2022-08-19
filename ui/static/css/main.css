@@ -169,8 +169,6 @@ form div:last-child {
 }
 
 form input[type="radio"] {
-    position: relative;
-    top: 2px;
     margin-left: 18px;
 }
 
