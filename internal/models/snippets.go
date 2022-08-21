@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Snippets represents a individual row in the Snippets table from our database
+// Snippet represents an individual row in the Snippets table from our database
 type Snippet struct {
 	ID      int
 	Title   string
@@ -66,9 +66,9 @@ func (m *SnippetModel) Latest() ([]*Snippet, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close() // Make sure we close the resultset
+	defer rows.Close()
 
-	snippets := []*Snippet{}
+	var snippets []*Snippet
 
 	for rows.Next() {
 		s := &Snippet{}

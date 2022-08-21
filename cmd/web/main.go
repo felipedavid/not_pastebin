@@ -21,7 +21,7 @@ type application struct {
 
 func main() {
 	// Parse command line flags
-	addr := flag.String("addr", ":4000", "HTTP network address")
+	addr := flag.String("addr", "127.0.0.1:4000", "HTTP network address")
 	dsn := flag.String("dsn", "web:123@/not_pastebin?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
