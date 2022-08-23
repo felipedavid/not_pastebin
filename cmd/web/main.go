@@ -59,7 +59,8 @@ func main() {
 	errorLog.Fatal(err)
 }
 
-// openDB just create a database connection pool and ping it to check if we can establish a connection
+// openDB just create a database connection pool and ping it to check if we can
+// establish a connection
 func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
