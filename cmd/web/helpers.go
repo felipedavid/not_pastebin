@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"strings"
 	"time"
 )
 
@@ -45,4 +46,12 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 
 	w.WriteHeader(status)
 	buf.WriteTo(w)
+}
+
+func getParameter(urlPath string, i int) string {
+	p := strings.Split(urlPath, "/")
+	if i < 0 || i+1 >= len(p) {
+		return ""
+	}
+	return p[i+1]
 }
