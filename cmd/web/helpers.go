@@ -9,10 +9,12 @@ import (
 	"time"
 )
 
+// newTemplateData allocates a new templateData object filling up the CurrentYear field
 func (app *application) newTemplateData(r *http.Request) *templateData {
 	return &templateData{CurrentYear: time.Now().Year()}
 }
 
+// serverError logs the error on the server side, and then returns a response with error 500
 func (app *application) serverError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	app.errorLog.Println(trace)
