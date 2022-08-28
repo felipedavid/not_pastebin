@@ -3,10 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/felipedavid/not_pastebin/internal/models"
-	"github.com/felipedavid/not_pastebin/internal/validator"
 	"net/http"
 	"strconv"
+
+	"github.com/felipedavid/not_pastebin/internal/models"
+	"github.com/felipedavid/not_pastebin/internal/validator"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -52,8 +53,11 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		flash := app.sessionManager.PopString(r.Context(), "flash")
+
 		td := app.newTemplateData(r)
 		td.Snippet = snippet
+		td.Flash = flash
 
 		app.render(w, http.StatusOK, "view.tmpl", td)
 	default:
@@ -115,6 +119,8 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 			app.serverError(w, err)
 			return
 		}
+
+		app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 
 		http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 	default:

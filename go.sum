@@ -1,2 +1,6 @@
+github.com/alexedwards/scs/mysqlstore v0.0.0-20220528130143-d93ace5be94b h1:dx819B7QKA4YdiOTcasZSHFGKHOeteRFU44aXXEO8lU=
+github.com/alexedwards/scs/mysqlstore v0.0.0-20220528130143-d93ace5be94b/go.mod h1:MKLf409wtunSUZ+5eUwPzlfGYSpITYzJZ4UZzU5rMoY=
+github.com/alexedwards/scs/v2 v2.5.0 h1:zgxOfNFmiJyXG7UPIuw1g2b9LWBeRLh3PjfB9BDmfL4=
+github.com/alexedwards/scs/v2 v2.5.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=
 github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=

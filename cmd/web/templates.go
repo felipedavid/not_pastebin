@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/felipedavid/not_pastebin/internal/models"
 	"html/template"
 	"path/filepath"
 	"time"
+
+	"github.com/felipedavid/not_pastebin/internal/models"
 )
 
 type templateData struct {
@@ -12,6 +13,7 @@ type templateData struct {
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
 	Form        any
+	Flash       string
 }
 
 func humanDate(t time.Time) string {
