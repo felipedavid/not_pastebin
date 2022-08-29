@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -19,6 +20,7 @@ import (
 type application struct {
 	infoLog, errorLog *log.Logger
 	snippets          *models.SnippetModel
+	users             *models.UsersModel
 	templateCache     map[string]*template.Template
 	sessionManager    *scs.SessionManager
 }
@@ -48,11 +50,14 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
+	// Make sure the client only sends cookies over HTTPS
+	sessionManager.Cookie.Secure = true
 
 	app := &application{
 		infoLog:        infoLog,
 		errorLog:       errorLog,
 		snippets:       &models.SnippetModel{DB: db},
+		users:          &models.UsersModel{DB: db},
 		templateCache:  templateCache,
 		sessionManager: sessionManager,
 	}
@@ -61,10 +66,17 @@ func main() {
 		Addr:     *addr,
 		Handler:  app.routes(),
 		ErrorLog: errorLog,
+		TLSConfig: &tls.Config{
+			CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+		},
+
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLog.Printf("Starting server on %v\n", *addr)
-	err = srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
 

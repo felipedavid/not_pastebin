@@ -10,11 +10,16 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	sm := app.sessionManager
-
-	mux.Handle("/", sm.LoadAndSave(http.HandlerFunc(app.home)))
-	mux.Handle("/snippet/view/", sm.LoadAndSave(http.HandlerFunc(app.snippetView)))
-	mux.Handle("/snippet/create", sm.LoadAndSave(http.HandlerFunc(app.snippetCreate)))
+	mux.Handle("/", app.loadAndSaveMiddleware(app.home))
+	mux.Handle("/snippet/view/", app.loadAndSaveMiddleware(app.snippetView))
+	mux.Handle("/snippet/create", app.loadAndSaveMiddleware(app.snippetCreate))
+	mux.Handle("/user/signup", app.loadAndSaveMiddleware(app.userSignup))
+	mux.Handle("/user/login", app.loadAndSaveMiddleware(app.userLogin))
+	mux.Handle("/user/logout", app.loadAndSaveMiddleware(app.userLogout))
 
 	return app.recoverPanic(app.logRequest(secureHeaders(mux)))
+}
+
+func (app *application) loadAndSaveMiddleware(f http.HandlerFunc) http.Handler {
+	return app.sessionManager.LoadAndSave(http.HandlerFunc(f))
 }

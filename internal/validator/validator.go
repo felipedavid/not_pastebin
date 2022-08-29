@@ -1,9 +1,14 @@
 package validator
 
 import (
+	"regexp"
 	"strings"
 	"unicode/utf8"
 )
+
+// Regex for checking the format of an email address (recommended by W3C and
+// Web Hypertext.
+var emailRegex = regexp.MustCompile("/^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/")
 
 type Validator struct {
 	FieldErrors map[string]string
@@ -35,6 +40,12 @@ func NotBlank(val string) bool {
 	return strings.TrimSpace(val) != ""
 }
 
+// MinChars returns true if the string contains at least 'n' characters
+func MinChars(value string, n int) bool {
+	return utf8.RuneCountInString(value) >= n
+}
+
+// MaxChars returns true if the string contains less than 'n' characters
 func MaxChars(value string, n int) bool {
 	return utf8.RuneCountInString(value) <= n
 }
