@@ -16,7 +16,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// application is the state that will be shared between all handlers
+// application is the state that will be shared between all handlers and some helpers procedures
 type application struct {
 	infoLog, errorLog *log.Logger
 	snippets          *models.SnippetModel
@@ -28,7 +28,7 @@ type application struct {
 func main() {
 	// Parse command line flags
 	addr := flag.String("addr", "127.0.0.1:4000", "HTTP network address")
-	dsn := flag.String("dsn", "web:123@/not_pastebin?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "root:secret@/not_pastebin_db?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
 	// Creating different loggers to make it easier to redirect the application
