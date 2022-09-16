@@ -130,10 +130,10 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 type userSignupForm struct {
-	Name     string
-	Email    string
-	Password string
-	validator.Validator
+	Name                string `form:"name`
+	Email               string `form:"email"`
+	Password            string `form:"password`
+	validator.Validator `form:"-`
 }
 
 func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
@@ -168,7 +168,24 @@ func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Fprintf(w, "Create a new user...")
+		err = app.users.Insert(form.Name, form.Email, form.Password)
+		if err != nil {
+			if errors.Is(err, models.ErrDuplicateEmail) {
+				form.AddFieldError("email", "Email address is already in use")
+
+				data := app.newTemplateData(r)
+				data.Form = form
+				app.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+			} else {
+				app.serverError(w, err)
+			}
+
+			return
+		}
+
+		app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
+
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 	default:
 		w.Header().Set("Allow", "GET, POST")
 		app.clientError(w, http.StatusMethodNotAllowed)
@@ -176,9 +193,23 @@ func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "User loging in...")
+	switch r.Method {
+	case http.MethodGet:
+		fmt.Fprintf(w, "Form to create a new user")
+	case http.MethodPost:
+		fmt.Fprintf(w, "Creating a new user")
+	default:
+		w.Header().Set("Allow", "GET, POST")
+		app.clientError(w, http.StatusMethodNotAllowed)
+	}
 }
 
 func (app *application) userLogout(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "User loging out...")
+	switch r.Method {
+	case http.MethodPost:
+		fmt.Fprintf(w, "Logging out from account")
+	default:
+		w.Header().Set("Allow", "POST")
+		app.clientError(w, http.StatusMethodNotAllowed)
+	}
 }

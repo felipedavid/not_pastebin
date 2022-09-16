@@ -8,7 +8,7 @@ import (
 
 // Regex for checking the format of an email address (recommended by W3C and
 // Web Hypertext.
-var EmailRegex = regexp.MustCompile("/^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/")
+var EmailRegex = regexp.MustCompile("^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,4}$")
 
 type Validator struct {
 	FieldErrors map[string]string
