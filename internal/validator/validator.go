@@ -8,7 +8,7 @@ import (
 
 // Regex for checking the format of an email address (recommended by W3C and
 // Web Hypertext.
-var emailRegex = regexp.MustCompile("/^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/")
+var EmailRegex = regexp.MustCompile("/^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/")
 
 type Validator struct {
 	FieldErrors map[string]string
@@ -57,4 +57,8 @@ func PermittedInt(value int, permittedValues ...int) bool {
 		}
 	}
 	return false
+}
+
+func Matches(value string, re *regexp.Regexp) bool {
+	return re.MatchString(value)
 }

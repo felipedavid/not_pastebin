@@ -139,7 +139,7 @@ type userSignupForm struct {
 func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		data := app.NewTemplateData(r)
+		data := app.newTemplateData(r)
 		data.Form = userSignupForm{}
 		app.render(w, http.StatusOK, "signup.tmpl", data)
 	case http.MethodPost:
@@ -150,14 +150,14 @@ func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
 		}
 
 		form := userSignupForm{
-			Name:     err.PostForm.Get("name"),
-			Email:    err.PostForm.Get("email"),
-			Password: err.PostForm.Get("password"),
+			Name:     r.PostForm.Get("name"),
+			Email:    r.PostForm.Get("email"),
+			Password: r.PostForm.Get("password"),
 		}
 
 		form.CheckField(validator.NotBlank(form.Name), "name", "This field cannot be blank")
 		form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
-		form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email address")
+		form.CheckField(validator.Matches(form.Email, validator.EmailRegex), "email", "This field must be a valid email address")
 		form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
 		form.CheckField(validator.MinChars(form.Password, 8), "password", "This field must be at least 8 characters long")
 
