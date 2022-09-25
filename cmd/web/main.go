@@ -1,95 +1,36 @@
 package main
 
 import (
-	"crypto/tls"
-	"database/sql"
 	"flag"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"time"
-
-	"github.com/alexedwards/scs/mysqlstore"
-	"github.com/alexedwards/scs/v2"
-	"github.com/felipedavid/not_pastebin/internal/models"
-	_ "github.com/go-sql-driver/mysql"
 )
 
-// application is the state that will be shared between all handlers and some helpers procedures
-type application struct {
-	infoLog, errorLog *log.Logger
-	snippets          *models.SnippetModel
-	users             *models.UsersModel
-	templateCache     map[string]*template.Template
-	sessionManager    *scs.SessionManager
+type app struct {
+	infoLogger *log.Logger
+	errLogger  *log.Logger
 }
 
 func main() {
-	// Parse command line flags
-	addr := flag.String("addr", "127.0.0.1:4000", "HTTP network address")
-	dsn := flag.String("dsn", "root:secret@/not_pastebin_db?parseTime=true", "MySQL data source name")
+	addr := *flag.String("addr", ":4000", "server listen address")
 	flag.Parse()
 
-	// Creating different loggers to make it easier to redirect the application
-	// output to different files based on unix's default streams
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	infoLogger := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errLogger := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	db, err := openDB(*dsn)
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-	defer db.Close()
-
-	templateCache, err := newTemplateCache()
-	if err != nil {
-		errorLog.Fatal(err)
+	a := app{
+		infoLogger: infoLogger,
+		errLogger:  errLogger,
 	}
 
-	sessionManager := scs.New()
-	sessionManager.Store = mysqlstore.New(db)
-	sessionManager.Lifetime = 12 * time.Hour
-	// Make sure the client only sends cookies over HTTPS
-	sessionManager.Cookie.Secure = true
-
-	app := &application{
-		infoLog:        infoLog,
-		errorLog:       errorLog,
-		snippets:       &models.SnippetModel{DB: db},
-		users:          &models.UsersModel{DB: db},
-		templateCache:  templateCache,
-		sessionManager: sessionManager,
+	s := http.Server{
+		Addr:     addr,
+		ErrorLog: errLogger,
+		Handler:  a.routes(),
 	}
 
-	srv := &http.Server{
-		Addr:     *addr,
-		Handler:  app.routes(),
-		ErrorLog: errorLog,
-		TLSConfig: &tls.Config{
-			CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
-		},
-
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-
-	infoLog.Printf("Starting server on %v\n", *addr)
-	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
-	errorLog.Fatal(err)
-}
-
-// openDB just create a database connection pool and ping it to check if we can
-// establish a connection
-func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = db.Ping(); err != nil {
-		return nil, err
-	}
-	return db, nil
+	infoLogger.Printf("Starting up server at %s\n", addr)
+	err := s.ListenAndServe()
+	errLogger.Fatal(err)
 }

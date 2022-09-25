@@ -1,3 +1,1 @@
-DROP TABLE snippets;
-DROP TABLE users;
-DROP TABLE sessions;
+DROP TABLE IF EXISTS snippets;
