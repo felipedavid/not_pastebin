@@ -13,3 +13,7 @@ func (a *app) serverError(w http.ResponseWriter, err error) {
 func (a *app) clientError(w http.ResponseWriter, code int) {
 	http.Error(w, http.StatusText(code), code)
 }
+
+func (a *app) notFound(w http.ResponseWriter) {
+	a.clientError(w, http.StatusNotFound)
+}
