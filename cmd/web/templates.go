@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/felipedavid/not_pastebin/internal/models"
 	"html/template"
@@ -52,10 +53,14 @@ func (a *app) render(w http.ResponseWriter, status int, page string, data *templ
 		return
 	}
 
-	w.WriteHeader(status)
+	buf := new(bytes.Buffer)
 
-	err := ts.ExecuteTemplate(w, "base", data)
+	err := ts.ExecuteTemplate(buf, "base", data)
 	if err != nil {
 		a.serverError(w, err)
 	}
+
+	w.WriteHeader(status)
+
+	buf.WriteTo(w)
 }
