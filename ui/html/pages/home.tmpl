@@ -1,0 +1,27 @@
+{{define "title"}}Not Pastebin{{end}}
+
+{{define "main"}}
+<h2>Latest Snippets</h2>
+    {{if .Snippets}}
+        <table class="table">
+            <thread>
+                <tr>
+                    <td>Title</td>
+                    <td>Created</td>
+                    <td>ID</td>
+                </tr>
+            </thread>
+            <tbody>
+            {{range .Snippets}}
+                <tr>
+                    <td><a href="/snippet?id={{.ID}}">{{.Title}}</a></td>
+                    <td>{{.Created}}</td>
+                    <td>{{.ID}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+    {{else}}
+        <h3>There is no snippets</h3>
+    {{end}}
+{{end}}
