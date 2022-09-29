@@ -2,8 +2,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"github.com/felipedavid/not_pastebin/internal/data"
+	"github.com/felipedavid/not_pastebin/internal/models"
 	"net/http"
 	"strconv"
 )
@@ -21,29 +20,13 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 			a.serverError(w, err)
 		}
 
-		for _, s := range snippets {
-			fmt.Fprintf(w, "%v\n", *s)
-		}
+		a.render(w, http.StatusOK, "home.tmpl", &templateData{
+			Snippets: snippets,
+		})
 	default:
 		w.Header().Set("Allow", "GET")
 		a.clientError(w, http.StatusMethodNotAllowed)
 	}
-	//tFiles := []string{
-	//	"./ui/html/base.tmpl",
-	//	"./ui/html/partials/nav.tmpl",
-	//}
-
-	//ts, err := template.ParseFiles(tFiles...)
-	//if err != nil {
-	//	a.serverError(w, err)
-	//	return
-	//}
-
-	//err = ts.ExecuteTemplate(w, "base", nil)
-	//if err != nil {
-	//	a.serverError(w, err)
-	//	return
-	//}
 }
 
 func (a *app) snippet(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +40,7 @@ func (a *app) snippet(w http.ResponseWriter, r *http.Request) {
 
 		s, err := a.snippets.Get(id)
 		if err != nil {
-			if errors.Is(err, data.ErrNoRecord) {
+			if errors.Is(err, models.ErrNoRecord) {
 				a.notFound(w)
 				return
 			}
@@ -65,7 +48,9 @@ func (a *app) snippet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Fprintf(w, "%v", *s)
+		a.render(w, http.StatusOK, "view.tmpl", &templateData{
+			Snippet: s,
+		})
 	default:
 		w.Header().Set("Allow", "GET")
 		a.clientError(w, http.StatusMethodNotAllowed)
