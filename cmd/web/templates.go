@@ -7,11 +7,33 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"time"
 )
 
 type templateData struct {
-	Snippet  *models.Snippet
-	Snippets []*models.Snippet
+	CurrentYear int
+	Snippet     *models.Snippet
+	Snippets    []*models.Snippet
+	ErrorCode   int
+}
+
+func newTemplateData(r *http.Request) *templateData {
+	return &templateData{
+		CurrentYear: time.Now().Year(),
+	}
+}
+
+func statusCodeText(status int) string {
+	return http.StatusText(status)
+}
+
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
+
+var functions = template.FuncMap{
+	"humanDate":      humanDate,
+	"statusCodeText": statusCodeText,
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
@@ -23,7 +45,9 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	}
 
 	for _, page := range pages {
-		ts, err := template.ParseFiles("./ui/html/base.tmpl")
+		filename := filepath.Base(page)
+
+		ts, err := template.New(filename).Funcs(functions).ParseFiles("./ui/html/base.tmpl")
 		if err != nil {
 			return nil, err
 		}

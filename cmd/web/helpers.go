@@ -3,17 +3,25 @@ package main
 import (
 	"net/http"
 	"runtime/debug"
+	"strings"
 )
 
 func (a *app) serverError(w http.ResponseWriter, err error) {
 	a.errLogger.Printf("%s\n%s", err.Error(), debug.Stack())
-	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	a.render(w, http.StatusInternalServerError, "error.tmpl", &templateData{
+		ErrorCode: http.StatusInternalServerError,
+	})
 }
 
 func (a *app) clientError(w http.ResponseWriter, code int) {
-	http.Error(w, http.StatusText(code), code)
+	a.render(w, code, "error.tmpl", &templateData{ErrorCode: code})
 }
 
 func (a *app) notFound(w http.ResponseWriter) {
 	a.clientError(w, http.StatusNotFound)
+}
+
+func (a *app) errorMethodNotAllowed(w http.ResponseWriter, allowed ...string) {
+	w.Header().Set("Allow", strings.Join(allowed, ", "))
+	a.clientError(w, http.StatusMethodNotAllowed)
 }
