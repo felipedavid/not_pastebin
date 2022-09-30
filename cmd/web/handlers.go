@@ -48,9 +48,21 @@ func (a *app) snippet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		a.render(w, http.StatusOK, "view.tmpl", &templateData{
-			Snippet: s,
-		})
+		data := newTemplateData(r)
+		data.Snippet = s
+
+		a.render(w, http.StatusOK, "view.tmpl", data)
+	default:
+		a.errorMethodNotAllowed(w, http.MethodGet)
+	}
+}
+
+func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		data := newTemplateData(r)
+		a.render(w, http.StatusOK, "create_snippet.tmpl", data)
+	case http.MethodPost:
 	default:
 		w.Header().Set("Allow", "GET")
 		a.clientError(w, http.StatusMethodNotAllowed)

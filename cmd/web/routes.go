@@ -10,6 +10,7 @@ func (a *app) routes() http.Handler {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 	mux.HandleFunc("/", a.home)
 	mux.HandleFunc("/snippet", a.snippet)
+	mux.HandleFunc("/snippet/create", a.createSnippet)
 
 	return a.logRequest(mux)
 }

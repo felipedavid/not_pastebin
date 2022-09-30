@@ -1,0 +1,35 @@
+{{define "title"}}Create a new snippet{{end}}
+
+{{define "main"}}
+    <form action="/snippet/create" method="POST">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="email" class="form-control" id="title">
+        </div>
+        <div class="form-group">
+            <label for="content">Content</label>
+            <input type="text" class="form-control" id="content">
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="expires" id="expires_day" checked>
+            <label class="form-check-label" for="expires_day">
+                One Day
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="expires" id="expires_month">
+            <label class="form-check-label" for="expires_month">
+                One Month
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="expires" id="expires_year">
+            <label class="form-check-label" for="expires_year">
+                One Year
+            </label>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Publish snippet</button>
+        </div>
+    </form>
+{{end}}
