@@ -62,7 +62,6 @@ func newTemplateCache() (map[string]*template.Template, error) {
 			return nil, err
 		}
 
-		filename := filepath.Base(page)
 		cache[filename] = ts
 	}
 
