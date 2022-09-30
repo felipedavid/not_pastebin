@@ -9,7 +9,7 @@ import (
 
 func (a *app) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		a.notFound(w)
 		return
 	}
 
@@ -20,12 +20,12 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 			a.serverError(w, err)
 		}
 
-		a.render(w, http.StatusOK, "home.tmpl", &templateData{
-			Snippets: snippets,
-		})
+		data := newTemplateData(r)
+		data.Snippets = snippets
+
+		a.render(w, http.StatusOK, "home.tmpl", data)
 	default:
-		w.Header().Set("Allow", "GET")
-		a.clientError(w, http.StatusMethodNotAllowed)
+		a.errorMethodNotAllowed(w, http.MethodGet)
 	}
 }
 
@@ -64,7 +64,6 @@ func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 		a.render(w, http.StatusOK, "create_snippet.tmpl", data)
 	case http.MethodPost:
 	default:
-		w.Header().Set("Allow", "GET")
-		a.clientError(w, http.StatusMethodNotAllowed)
+		a.errorMethodNotAllowed(w, http.MethodGet, http.MethodPost)
 	}
 }
