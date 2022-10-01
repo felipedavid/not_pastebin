@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/felipedavid/not_pastebin/internal/models"
 	"net/http"
 	"strconv"
@@ -63,6 +64,29 @@ func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 		data := newTemplateData(r)
 		a.render(w, http.StatusOK, "create_snippet.tmpl", data)
 	case http.MethodPost:
+		err := r.ParseForm()
+		if err != nil {
+			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		title := r.PostForm.Get("title")
+		content := r.PostForm.Get("content")
+
+		expiresStr := r.PostForm.Get("expires")
+		expires, err := strconv.ParseInt(expiresStr, 10, 64)
+		if err != nil {
+			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		id, err := a.snippets.Insert(title, content, expires)
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusMovedPermanently)
 	default:
 		a.errorMethodNotAllowed(w, http.MethodGet, http.MethodPost)
 	}

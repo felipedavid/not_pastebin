@@ -35,15 +35,17 @@ func (m SnippetModel) Get(id int64) (*Snippet, error) {
 	return s, nil
 }
 
-func (m SnippetModel) Insert(title, content string, expires time.Time) (int64, error) {
-	stmt := `INSERT INTO snippets (title, content, created, expires) VALUES ($1, $2, CURRENT_DATE, CURRENT_DATE + INTERVAL "$3 day")`
+func (m SnippetModel) Insert(title, content string, expires int64) (int64, error) {
+	// TODO: Figure out a way to set a expires statemetn into the SQL query
+	stmt := `INSERT INTO snippets (title, content, created, expires) VALUES ($1, $2, NOW(), NOW()) RETURNING id`
 
-	row, err := m.DB.Exec(stmt, title, content, expires)
-	if err != nil {
+	row := m.DB.QueryRow(stmt, title, content)
+	if err := row.Err(); err != nil {
 		return 0, err
 	}
 
-	id, err := row.LastInsertId()
+	var id int64
+	err := row.Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -52,7 +54,7 @@ func (m SnippetModel) Insert(title, content string, expires time.Time) (int64, e
 }
 
 func (m SnippetModel) Latest() ([]*Snippet, error) {
-	stmt := `SELECT id, title, content, created, expires FROM snippets ORDER BY created LIMIT 10`
+	stmt := `SELECT id, title, content, created, expires FROM snippets ORDER BY created DESC LIMIT 10`
 
 	rows, err := m.DB.Query(stmt)
 	if err != nil {
