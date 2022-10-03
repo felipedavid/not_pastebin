@@ -4,6 +4,9 @@
     <form action="/snippet/create" method="POST">
         <div class="form-group">
             <label for="title">Title</label>
+            {{with .FieldErrors.title}}
+                <br><label class="alert alert-danger">{{.}}</label>
+            {{end}}
             <input type="text" class="form-control" id="title" name="title">
         </div>
         <div class="form-group">

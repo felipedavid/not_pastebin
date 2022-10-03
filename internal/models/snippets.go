@@ -19,7 +19,7 @@ type SnippetModel struct {
 }
 
 func (m SnippetModel) Get(id int64) (*Snippet, error) {
-	stmt := `SELECT id, title, content, created, expires FROM snippets WHERE id = $1 AND expires > CURRENT_DATE`
+	stmt := `SELECT id, title, content, created, expires FROM snippet WHERE id = $1 AND expires > CURRENT_DATE`
 
 	row := m.DB.QueryRow(stmt, id)
 
@@ -37,7 +37,7 @@ func (m SnippetModel) Get(id int64) (*Snippet, error) {
 
 func (m SnippetModel) Insert(title, content string, expires int64) (int64, error) {
 	// TODO: Figure out a way to set a expires statemetn into the SQL query
-	stmt := `INSERT INTO snippets (title, content, created, expires) VALUES ($1, $2, NOW(), NOW()) RETURNING id`
+	stmt := `INSERT INTO snippet (title, content, created, expires) VALUES ($1, $2, NOW(), NOW()) RETURNING id`
 
 	row := m.DB.QueryRow(stmt, title, content)
 	if err := row.Err(); err != nil {
@@ -54,7 +54,7 @@ func (m SnippetModel) Insert(title, content string, expires int64) (int64, error
 }
 
 func (m SnippetModel) Latest() ([]*Snippet, error) {
-	stmt := `SELECT id, title, content, created, expires FROM snippets ORDER BY created DESC LIMIT 10`
+	stmt := `SELECT id, title, content, created, expires FROM snippet ORDER BY created DESC LIMIT 10`
 
 	rows, err := m.DB.Query(stmt)
 	if err != nil {

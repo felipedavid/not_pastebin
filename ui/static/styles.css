@@ -1,3 +1,8 @@
 .form-check {
     display: inline-block;
 }
+
+.alert-danger {
+    padding: 2px 2px 2px 2px;
+    margin-bottom: 2px;
+}

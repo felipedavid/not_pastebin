@@ -20,8 +20,10 @@ type app struct {
 }
 
 func main() {
-	addr := *flag.String("addr", ":4000", "server listen address")
-	dsn := *flag.String("dsn", "postgres://root:secret@localhost/not_pastebin?sslmode=disable", "Data source name")
+	addr := *flag.String("addr", ":8080", "server listen address")
+	dsn := *flag.String("dsn",
+		"postgres://postgres:secret@localhost/not_pastebin?sslmode=disable",
+		"Data source name")
 	flag.Parse()
 
 	infoLogger := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)

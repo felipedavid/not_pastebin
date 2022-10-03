@@ -74,7 +74,6 @@ func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 
 		title := r.PostForm.Get("title")
 		content := r.PostForm.Get("content")
-
 		expiresStr := r.PostForm.Get("expires")
 		expires, err := strconv.ParseInt(expiresStr, 10, 64)
 		if err != nil {

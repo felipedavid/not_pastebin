@@ -15,6 +15,7 @@ type templateData struct {
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
 	ErrorCode   int
+	FieldErrors map[string]string
 }
 
 func newTemplateData(r *http.Request) *templateData {
