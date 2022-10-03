@@ -19,6 +19,7 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 		snippets, err := a.snippets.Latest()
 		if err != nil {
 			a.serverError(w, err)
+			return
 		}
 
 		data := newTemplateData(r)
