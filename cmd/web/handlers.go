@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/felipedavid/not_pastebin/internal/models"
+	"github.com/felipedavid/not_pastebin/internal/validator"
 	"net/http"
 	"strconv"
 )
@@ -78,6 +79,22 @@ func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 		expires, err := strconv.ParseInt(expiresStr, 10, 64)
 		if err != nil {
 			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		fieldErrors := make(map[string]string)
+		val := validator.Validator{FieldErrors: fieldErrors}
+
+		val.CheckField(validator.NotBlank(title), "title", "This field cannot be blank")
+		val.CheckField(validator.MaxChars(title, 100), "title", "This field cannot be blank")
+		val.CheckField(validator.NotBlank(content), content, "This field cannot be blank")
+		val.CheckField(validator.PermittedInt(expires, 1, 7, 365), "expires",
+			"This field must be equal to 1, 7 or 365")
+
+		if !val.Valid() {
+			data := newTemplateData(r)
+			data.FieldErrors = fieldErrors
+			a.render(w, http.StatusOK, "create_snippet.tmpl", data)
 			return
 		}
 
