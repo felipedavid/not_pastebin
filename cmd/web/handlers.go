@@ -51,11 +51,8 @@ func (a *app) snippet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		flash := a.sessionManager.PopString(r.Context(), "flash")
-
-		data := newTemplateData(r)
+		data := a.newTemplateData(r)
 		data.Snippet = s
-		data.Flash = flash
 
 		a.render(w, http.StatusOK, "view.tmpl", data)
 	default:
@@ -94,7 +91,7 @@ func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 			"This field must be equal to 1, 7 or 365")
 
 		if !val.Valid() {
-			data := newTemplateData(r)
+			data := a.newTemplateData(r)
 			data.FieldErrors = fieldErrors
 			a.render(w, http.StatusOK, "create_snippet.tmpl", data)
 			return
