@@ -3,20 +3,24 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/felipedavid/not_pastebin/internal/models"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 )
 
 type app struct {
-	infoLogger    *log.Logger
-	errLogger     *log.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
+	infoLogger     *log.Logger
+	errLogger      *log.Logger
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -36,11 +40,16 @@ func main() {
 
 	templateCache, err := newTemplateCache()
 
+	sessionManager := scs.New()
+	sessionManager.Store = postgresstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
 	a := app{
-		infoLogger:    infoLogger,
-		errLogger:     errLogger,
-		snippets:      &models.SnippetModel{DB: db},
-		templateCache: templateCache,
+		infoLogger:     infoLogger,
+		errLogger:      errLogger,
+		snippets:       &models.SnippetModel{DB: db},
+		templateCache:  templateCache,
+		sessionManager: sessionManager,
 	}
 
 	s := http.Server{

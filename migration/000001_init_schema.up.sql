@@ -5,3 +5,11 @@ CREATE TABLE snippet (
      created TIMESTAMP NOT NULL DEFAULT now(),
      expires TIMESTAMP NOT NULL
 );
+
+CREATE TABLE sessions (
+    token VARCHAR(43) PRIMARY KEY,
+    data BYTEA NOT NULL,
+    expiry TIMESTAMP  NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions(expiry);

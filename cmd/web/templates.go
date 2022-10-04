@@ -16,6 +16,7 @@ type templateData struct {
 	Snippets    []*models.Snippet
 	ErrorCode   int
 	FieldErrors map[string]string
+	Flash       string
 }
 
 func newTemplateData(r *http.Request) *templateData {

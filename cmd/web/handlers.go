@@ -51,8 +51,11 @@ func (a *app) snippet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		flash := a.sessionManager.PopString(r.Context(), "flash")
+
 		data := newTemplateData(r)
 		data.Snippet = s
+		data.Flash = flash
 
 		a.render(w, http.StatusOK, "view.tmpl", data)
 	default:
@@ -103,6 +106,7 @@ func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		a.sessionManager.Put(r.Context(), "flash", "Snippet successfully created")
 		http.Redirect(w, r, fmt.Sprintf("/snippet?id=%d", id), http.StatusMovedPermanently)
 	default:
 		a.errorMethodNotAllowed(w, http.MethodGet, http.MethodPost)
