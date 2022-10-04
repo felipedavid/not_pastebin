@@ -23,7 +23,7 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		data := newTemplateData(r)
+		data := a.newTemplateData(r)
 		data.Snippets = snippets
 
 		a.render(w, http.StatusOK, "home.tmpl", data)
@@ -63,7 +63,7 @@ func (a *app) snippet(w http.ResponseWriter, r *http.Request) {
 func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		data := newTemplateData(r)
+		data := a.newTemplateData(r)
 		a.render(w, http.StatusOK, "create_snippet.tmpl", data)
 	case http.MethodPost:
 		err := r.ParseForm()
