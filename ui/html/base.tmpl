@@ -6,7 +6,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link href="/static/bootstrap/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link href="/static/styles.css" rel="stylesheet">
     <title>{{template "title" .}}</title>
 </head>
@@ -16,7 +16,7 @@
         <label class="alert alert-success">{{.}}</label>
     {{end}}
     {{template "main" .}}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    <script src="/static/bootstrap/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     {{template "footer" .}}
 </body>
 </html>
