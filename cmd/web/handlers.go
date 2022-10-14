@@ -109,3 +109,35 @@ func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 		a.errorMethodNotAllowed(w, http.MethodGet, http.MethodPost)
 	}
 }
+
+func (a *app) createUser(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		data := a.newTemplateData(r)
+		a.render(w, http.StatusOK, "create_user.tmpl", data)
+	case http.MethodPost:
+		fmt.Fprintf(w, "This should actually create a user")
+	default:
+		a.errorMethodNotAllowed(w, http.MethodGet, http.MethodPost)
+	}
+}
+
+func (a *app) login(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		fmt.Fprintf(w, "This should be a html form for login")
+	case http.MethodPost:
+		fmt.Fprintf(w, "This should actually make the user login")
+	default:
+		a.errorMethodNotAllowed(w, http.MethodGet, http.MethodPost)
+	}
+}
+
+func (a *app) logout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		a.errorMethodNotAllowed(w, http.MethodGet, http.MethodPost)
+		return
+	}
+
+	fmt.Fprintf(w, "Logging out...")
+}
