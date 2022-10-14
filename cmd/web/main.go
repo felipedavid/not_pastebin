@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"github.com/alexedwards/scs/postgresstore"
@@ -43,6 +44,7 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = postgresstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Secure = true // Ensures that the web browser will only send the cookie thought a TSL connection
 
 	a := app{
 		infoLogger:     infoLogger,
@@ -52,14 +54,23 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
+
 	s := http.Server{
-		Addr:     addr,
-		ErrorLog: errLogger,
-		Handler:  a.routes(),
+		Addr:      addr,
+		ErrorLog:  errLogger,
+		Handler:   a.routes(),
+		TLSConfig: tlsConfig,
+
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLogger.Printf("Starting up server at %s\n", addr)
-	err = s.ListenAndServe()
+	err = s.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errLogger.Fatal(err)
 }
 
