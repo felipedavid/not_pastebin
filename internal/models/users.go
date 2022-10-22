@@ -2,7 +2,10 @@ package models
 
 import (
 	"database/sql"
+	"errors"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 	"time"
 )
 
@@ -28,6 +31,12 @@ func (m *UserModel) Insert(name, email, password string) error {
 
 	_, err = m.DB.Exec(stmt, name, email, hashedPasword)
 	if err != nil {
+		var psqlError *pq.Error
+		if errors.As(err, &psqlError) {
+			if psqlError.Code == "23505" && strings.Contains(psqlError.Message, "users_uc_email") {
+				return ErrDuplicateEmail
+			}
+		}
 		return err
 	}
 

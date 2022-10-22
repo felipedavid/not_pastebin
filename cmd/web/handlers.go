@@ -154,7 +154,16 @@ func (a *app) userSignup(w http.ResponseWriter, r *http.Request) {
 
 		err = a.users.Insert(form.Name, form.Email, form.Password)
 		if err != nil {
-			a.serverError(w, err)
+			if errors.Is(err, models.ErrDuplicateEmail) {
+				form.AddFieldError("email", "Email address is already in use")
+
+				data := a.newTemplateData(r)
+				data.Form = form
+				a.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+			} else {
+				a.serverError(w, err)
+			}
+			return
 		}
 
 		a.sessionManager.Put(r.Context(), "flash", "Your signup was successul. Please log in.")
