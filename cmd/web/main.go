@@ -22,13 +22,15 @@ type app struct {
 	snippets       *models.SnippetModel
 	templateCache  map[string]*template.Template
 	sessionManager *scs.SessionManager
+	env            string
 }
 
 func main() {
-	addr := *flag.String("addr", ":8080", "server listen address")
+	addr := *flag.String("addr", ":4000", "server listen address")
 	dsn := *flag.String("dsn",
 		"postgres://postgres:secret@localhost/not_pastebin?sslmode=disable",
 		"Data source name")
+	env := *flag.String("env", "development", "Environment (development|production)")
 	flag.Parse()
 
 	infoLogger := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -52,6 +54,7 @@ func main() {
 		snippets:       &models.SnippetModel{DB: db},
 		templateCache:  templateCache,
 		sessionManager: sessionManager,
+		env:            env,
 	}
 
 	tlsConfig := &tls.Config{

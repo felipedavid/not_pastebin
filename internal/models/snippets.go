@@ -54,7 +54,7 @@ func (m SnippetModel) Insert(title, content string, expires int64) (int64, error
 }
 
 func (m SnippetModel) Latest() ([]*Snippet, error) {
-	stmt := `SELECT id, title, content, created, expires FROM snippet ORDER BY created DESC LIMIT 10`
+	stmt := `SELECT id, title, content, created, expires FROM snippet WHERE expires > CURRENT_DATE ORDER BY created DESC LIMIT 10`
 
 	rows, err := m.DB.Query(stmt)
 	if err != nil {

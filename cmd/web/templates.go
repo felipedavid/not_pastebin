@@ -72,21 +72,47 @@ func newTemplateCache() (map[string]*template.Template, error) {
 }
 
 func (a *app) render(w http.ResponseWriter, status int, page string, data *templateData) {
-	ts, ok := a.templateCache[page]
-	if !ok {
-		err := fmt.Errorf("the template %s does not exist", page)
-		a.serverError(w, err)
-		return
-	}
-
 	buf := new(bytes.Buffer)
 
-	err := ts.ExecuteTemplate(buf, "base", data)
-	if err != nil {
-		a.serverError(w, err)
+	// If we are in a development environment, don't use the template cache
+	if a.env == "development" {
+		path := fmt.Sprintf("./ui/html/pages/%s", page)
+		ts, err := template.New(path).Funcs(functions).ParseFiles("./ui/html/base.tmpl")
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		ts, err = ts.ParseFiles(path)
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		err = ts.ExecuteTemplate(buf, "base", data)
+		if err != nil {
+			a.serverError(w, err)
+		}
+	} else {
+		ts, ok := a.templateCache[page]
+		if !ok {
+			err := fmt.Errorf("the template %s does not exist", page)
+			a.serverError(w, err)
+			return
+		}
+
+		err := ts.ExecuteTemplate(buf, "base", data)
+		if err != nil {
+			a.serverError(w, err)
+		}
 	}
 
 	w.WriteHeader(status)
-
 	buf.WriteTo(w)
 }
