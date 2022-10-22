@@ -25,3 +25,17 @@ func (a *app) errorMethodNotAllowed(w http.ResponseWriter, allowed ...string) {
 	w.Header().Set("Allow", strings.Join(allowed, ", "))
 	a.clientError(w, http.StatusMethodNotAllowed)
 }
+
+func (a *app) decodePostForm(r *http.Request, dst any) error {
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	err = a.formDecoder.Decode(dst, r.PostForm)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

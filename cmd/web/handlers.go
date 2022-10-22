@@ -60,6 +60,13 @@ func (a *app) snippet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type snippetCreateForm struct {
+	Title       string
+	Content     string
+	Expires     int
+	FieldErrors map[string]string
+}
+
 func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -110,19 +117,54 @@ func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *app) createUser(w http.ResponseWriter, r *http.Request) {
+type userSignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form::"-"`
+}
+
+func (a *app) userSignup(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		data := a.newTemplateData(r)
-		a.render(w, http.StatusOK, "create_user.tmpl", data)
+		data.Form = userSignupForm{}
+		a.render(w, http.StatusOK, "signup.tmpl", data)
 	case http.MethodPost:
-		fmt.Fprintf(w, "This should actually create a user")
+		var form userSignupForm
+
+		err := a.decodePostForm(r, &form)
+		if err != nil {
+			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		form.CheckField(validator.NotBlank(form.Name), "name", "This field cannot be blank")
+		form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
+		form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email")
+		form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
+		form.CheckField(validator.MinChars(form.Password, 8), "password", "This field must be at least 8 characters long")
+
+		if !form.Valid() {
+			data := a.newTemplateData(r)
+			data.Form = form
+			a.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+			return
+		}
+
+		err = a.users.Insert(form.Name, form.Email, form.Password)
+		if err != nil {
+			a.serverError(w, err)
+		}
+
+		a.sessionManager.Put(r.Context(), "flash", "Your signup was successul. Please log in.")
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 	default:
 		a.errorMethodNotAllowed(w, http.MethodGet, http.MethodPost)
 	}
 }
 
-func (a *app) login(w http.ResponseWriter, r *http.Request) {
+func (a *app) userLogin(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		fmt.Fprintf(w, "This should be a html form for login")
