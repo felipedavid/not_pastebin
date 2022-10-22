@@ -17,6 +17,7 @@ type templateData struct {
 	ErrorCode   int
 	FieldErrors map[string]string
 	Flash       string
+	Form        any
 }
 
 func (a *app) newTemplateData(r *http.Request) *templateData {

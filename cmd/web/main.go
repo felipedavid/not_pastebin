@@ -7,6 +7,7 @@ import (
 	"github.com/alexedwards/scs/postgresstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/felipedavid/not_pastebin/internal/models"
+	"github.com/go-playground/form/v4"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,12 +18,16 @@ import (
 )
 
 type app struct {
-	infoLogger     *log.Logger
-	errLogger      *log.Logger
-	snippets       *models.SnippetModel
+	infoLogger *log.Logger
+	errLogger  *log.Logger
+
+	snippets *models.SnippetModel
+	users    *models.UserModel
+
 	templateCache  map[string]*template.Template
 	sessionManager *scs.SessionManager
 	env            string
+	formDecoder    *form.Decoder
 }
 
 func main() {
@@ -49,12 +54,16 @@ func main() {
 	sessionManager.Cookie.Secure = true // Ensures that the web browser will only send the cookie thought a TSL connection
 
 	a := app{
-		infoLogger:     infoLogger,
-		errLogger:      errLogger,
-		snippets:       &models.SnippetModel{DB: db},
+		infoLogger: infoLogger,
+		errLogger:  errLogger,
+
+		snippets: &models.SnippetModel{DB: db},
+		users:    &models.UserModel{DB: db},
+
 		templateCache:  templateCache,
 		sessionManager: sessionManager,
 		env:            env,
+		formDecoder:    form.NewDecoder(),
 	}
 
 	tlsConfig := &tls.Config{

@@ -11,8 +11,8 @@ func (a *app) routes() http.Handler {
 	mux.Handle("/", a.loadAndSave(a.home))
 	mux.Handle("/snippet", a.loadAndSave(a.snippet))
 	mux.Handle("/snippet/create", a.loadAndSave(a.createSnippet))
-	mux.Handle("/user/signup", a.loadAndSave(a.createUser))
-	mux.Handle("/user/login", a.loadAndSave(a.login))
+	mux.Handle("/user/signup", a.loadAndSave(a.userSignup))
+	mux.Handle("/user/login", a.loadAndSave(a.userLogin))
 	mux.Handle("/user/logout", a.loadAndSave(a.logout))
 
 	return a.recoverPanic(a.logRequest(a.secureHeaders(mux)))
