@@ -35,7 +35,7 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 func (a *app) viewSnippet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
-		a.notFOund(w)
+		a.notFound(w)
 		return
 	}
 	fmt.Fprintf(w, "View snippet #%d", id)

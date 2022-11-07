@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-// Just a neat way to do dependecy injection. If a handler or helper function
-// needs some kind of dependecy we just add the dependacy into the app struct
+// Just a neat way to do dependency injection. If a handler or helper function
+// needs some kind of dependency we just add the dependency into the app struct,
 // and then we make the procedure a method of the struct
 type app struct {
 	errLogger  *log.Logger
@@ -24,6 +24,7 @@ func main() {
 	errLog := log.New(os.Stderr, "ERROR\t", log.Lshortfile|log.Ldate|log.Ltime)
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 
+	// Instantiating application's dependencies
 	a := &app{
 		errLogger:  errLog,
 		infoLogger: infoLog,
