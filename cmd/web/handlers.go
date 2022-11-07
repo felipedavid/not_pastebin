@@ -8,7 +8,7 @@ import (
 )
 
 // home is a handler. Handlers in go are like controllers in the MVC pattern
-func home(w http.ResponseWriter, r *http.Request) {
+func (a *app) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -32,7 +32,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func viewSnippet(w http.ResponseWriter, r *http.Request) {
+func (a *app) viewSnippet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
 		fmt.Fprintf(w, "Snippet not found")
@@ -41,7 +41,7 @@ func viewSnippet(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "View snippet #%d", id)
 }
 
-func createSnippet(w http.ResponseWriter, r *http.Request) {
+func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		fmt.Fprintf(w, "Creating snippet")
