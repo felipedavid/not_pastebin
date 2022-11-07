@@ -30,18 +30,10 @@ func main() {
 		infoLogger: infoLog,
 	}
 
-	// Creating a router and setting up routes
-	mux := http.NewServeMux()
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view/", a.viewSnippet)
-	mux.HandleFunc("/snippet/create", a.createSnippet)
-
 	// Creating a new server and listening in 'addr'
 	server := &http.Server{
 		Addr:     addr,
-		Handler:  mux,
+		Handler:  a.routes(),
 		ErrorLog: errLog,
 	}
 	infoLog.Printf("Starting server on %s\n", addr)
