@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"github.com/felipedavid/not_pastebin/internal/models"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +17,7 @@ import (
 type app struct {
 	errLogger  *log.Logger
 	infoLogger *log.Logger
+	snippets   *models.SnippetModel
 }
 
 func main() {
@@ -39,6 +41,7 @@ func main() {
 	a := &app{
 		errLogger:  errLog,
 		infoLogger: infoLog,
+		snippets:   &models.SnippetModel{DB: db},
 	}
 
 	// Creating a new server and listening in 'addr'
