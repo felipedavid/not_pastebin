@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/felipedavid/not_pastebin/internal/models"
+	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -60,7 +61,22 @@ func (a *app) viewSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", *s)
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/view.tmpl",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		a.serverError(w, err)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", s)
+	if err != nil {
+		a.serverError(w, err)
+	}
 }
 
 func (a *app) createSnippet(w http.ResponseWriter, r *http.Request) {
