@@ -282,7 +282,7 @@ div.error {
 }
 
 table {
-    background: white;
+    background: #222222;
     border: 1px solid #E4E5E7;
     border-collapse: collapse;
     width: 100%;
@@ -295,7 +295,7 @@ td, th {
 
 th:last-child, td:last-child {
     text-align: right;
-    color: #6A6C6F;
+    color: #EEEEEE;
 }
 
 tr {
@@ -303,7 +303,7 @@ tr {
 }
 
 tr:nth-child(2n) {
-    background-color: #F7F9FA;
+    background-color: #111111;
 }
 
 footer {
