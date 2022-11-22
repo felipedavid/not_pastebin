@@ -3,10 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/felipedavid/not_pastebin/internal/models"
 	"html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/felipedavid/not_pastebin/internal/models"
 )
 
 // home is a handler. Handlers in go are like controllers in the MVC pattern
@@ -22,25 +23,24 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, s := range snippets {
-		fmt.Fprintf(w, "%v\n", *s)
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/home.tmpl",
 	}
-	//files := []string{
-	//	"./ui/html/base.tmpl",
-	//	"./ui/html/partials/nav.tmpl",
-	//	"./ui/html/pages/home.tmpl",
-	//}
 
-	//ts, err := template.ParseFiles(files...)
-	//if err != nil {
-	//	a.serverError(w, err)
-	//	return
-	//}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		a.serverError(w, err)
+		return
+	}
 
-	//err = ts.ExecuteTemplate(w, "base", nil)
-	//if err != nil {
-	//	a.serverError(w, err)
-	//}
+	data := &templateData{Snippets: snippets}
+
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		a.serverError(w, err)
+	}
 
 }
 
@@ -73,7 +73,9 @@ func (a *app) viewSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.ExecuteTemplate(w, "base", s)
+	data := &templateData{Snippet: s}
+
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		a.serverError(w, err)
 	}
