@@ -3,10 +3,12 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"github.com/felipedavid/not_pastebin/internal/models"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/felipedavid/not_pastebin/internal/models"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -15,9 +17,10 @@ import (
 // needs some kind of dependency we just add the dependency into the app struct,
 // and then we make the procedure a method of the struct
 type app struct {
-	errLogger  *log.Logger
-	infoLogger *log.Logger
-	snippets   *models.SnippetModel
+	errLogger     *log.Logger
+	infoLogger    *log.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -37,11 +40,16 @@ func main() {
 	}
 	defer db.Close()
 
+	// Creating a template cache, so we don't need to read the template files
+	// from disk and parse them for every request
+	templateCache, err := newTemplateCache()
+
 	// Instantiating application's dependencies
 	a := &app{
-		errLogger:  errLog,
-		infoLogger: infoLog,
-		snippets:   &models.SnippetModel{DB: db},
+		errLogger:     errLog,
+		infoLogger:    infoLog,
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
 	}
 
 	// Creating a new server and listening in 'addr'
