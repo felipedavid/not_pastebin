@@ -43,6 +43,9 @@ func main() {
 	// Creating a template cache, so we don't need to read the template files
 	// from disk and parse them for every request
 	templateCache, err := newTemplateCache()
+	if err != nil {
+		errLog.Fatal(err)
+	}
 
 	// Instantiating application's dependencies
 	a := &app{
