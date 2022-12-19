@@ -1,23 +1,32 @@
-createdb:
-	 mariadb -u root -e "CREATE DATABASE not_pastebin CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" -p
+pwd = $(shell pwd)
 
-dropdb:
-	mariadb -u root -e "DROP DATABASE not_pastebin;" -p
+.PHONY: db
+db:
+	docker container run --detach --name db \
+			--restart always \
+			--publish 3306:3306 \
+			--env MYSQL_ROOT_PASSWORD=secret \
+			--env MYSQL_DATABASE=snippetbox \
+			--env MYSQL_USER=dev \
+			--env MYSQL_PASSWORD=dev \
+			--mount 'type=bind,src=$(pwd)/sql,dst=/docker-entrypoint-initdb.d' \
+			mysql:8.0.28
 
-createuser:
-	mariadb -u root -e "CREATE USER 'web'@'localhost';\
-		GRANT SELECT, INSERT, UPDATE, DELETE ON not_pastebin.* TO 'web'@'localhost';\
-		ALTER USER 'web'@'localhost' IDENTIFIED BY 'pass';" -p
-
-dsn = "mysql://root:123@tcp(127.0.0.1:3306)/not_pastebin"
-
-migrateup:
-	migrate -path migration -database $(dsn) -verbose up
-
-migratedown:
-	migrate -path migration -database $(dsn) -verbose down
-
+.PHONY: run
 run:
 	go run ./cmd/web
 
-.PHONY: createdb dropdb createuser migrateup migratedown
+.PHONY: testdb
+testdb:
+	docker container run --detach --name testdb \
+			--restart always \
+			--publish 3307:3306 \
+			--env MYSQL_ROOT_PASSWORD=secret \
+			--env MYSQL_DATABASE=snippetbox \
+			--env MYSQL_USER=test \
+			--env MYSQL_PASSWORD=test \
+			mysql:8.0.28
+
+.PHONY: test
+test:
+	go test -cover -v ./...

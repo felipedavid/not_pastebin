@@ -2,62 +2,73 @@ package main
 
 import (
 	"html/template"
+	"io/fs"
 	"net/http"
 	"path/filepath"
 	"time"
 
 	"github.com/felipedavid/not_pastebin/internal/models"
+	"github.com/felipedavid/not_pastebin/ui"
+	"github.com/justinas/nosurf"
 )
 
+type templateData struct {
+	CurrentYear     int
+	Snippet         *models.Snippet
+	User            *models.User
+	Snippets        []*models.Snippet
+	Form            any
+	Flash           string
+	IsAuthenticated bool
+	CSRFToken       string
+}
+
 func humanDate(t time.Time) string {
-	return t.Format("02 Jan 2006 at 15:04")
+	if t.IsZero() {
+		return ""
+	}
+	return t.UTC().Format("02 Jan 2006 at 15:04")
 }
 
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 }
 
-// templateData will hold any dynamic data that we pass to our templates
-type templateData struct {
-	CurrentYear int
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-}
-
-func (a *app) newTemplateData(r *http.Request) *templateData {
-	return &templateData{CurrentYear: time.Now().Year()}
+func (app *application) newTemplateData(r *http.Request) *templateData {
+	return &templateData{
+		CurrentYear:     time.Now().Year(),
+		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
+		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
+	}
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	// Get a slice of filepathes for all the files that match
-	// the regular expression
-	files, err := filepath.Glob("./ui/html/pages/*.tmpl")
+	pages, err := fs.Glob(ui.Files, "html/pages/*.tmpl")
 	if err != nil {
 		return nil, err
 	}
+	for _, page := range pages {
+		name := filepath.Base(page)
 
-	for _, filePath := range files {
-		fileName := filepath.Base(filePath)
+		patterns := []string{
+			"html/base.tmpl",
+			"html/partials/*.tmpl",
+			page,
+		}
 
-		ts, err := template.New(fileName).Funcs(functions).ParseFiles("./ui/html/base.tmpl")
+		ts, err := template.
+			New(name).
+			Funcs(functions).
+			ParseFS(ui.Files, patterns...)
 		if err != nil {
 			return nil, err
 		}
 
-		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
-		if err != nil {
-			return nil, err
-		}
-
-		ts, err = ts.ParseFiles(filePath)
-		if err != nil {
-			return nil, err
-		}
-
-		cache[fileName] = ts
+		cache[name] = ts
 	}
 
-	return cache, err
+	return cache, nil
 }

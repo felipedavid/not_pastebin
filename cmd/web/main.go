@@ -7,77 +7,90 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/felipedavid/not_pastebin/internal/models"
-
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// Just a neat way to do dependency injection. If a handler or helper function
-// needs some kind of dependency we just add the dependency into the app struct,
-// and then we make the procedure a method of the struct
-type app struct {
-	errLogger     *log.Logger
-	infoLogger    *log.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
+type application struct {
+	errorLog       *log.Logger
+	infoLog        *log.Logger
+	snippets       models.SnippetModelService
+	users          models.UserModelService
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
+	debug          bool
 }
 
-func main() {
-	// Parsing command line flags
-	addr := *flag.String("addr", "127.0.0.1:4000", "Server address")
-	dsn := *flag.String("dsn", "web:pass@tcp(127.0.0.1:3306)/not_pastebin?parseTime=true", "Database service name")
-	flag.Parse()
-
-	// Creating application's loggers
-	errLog := log.New(os.Stderr, "ERROR\t", log.Lshortfile|log.Ldate|log.Ltime)
-	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-
-	// Connecting to the database
-	db, err := openDatabase(dsn)
-	if err != nil {
-		errLog.Fatal(err)
-	}
-	defer db.Close()
-
-	// Creating a template cache, so we don't need to read the template files
-	// from disk and parse them for every request
-	templateCache, err := newTemplateCache()
-	if err != nil {
-		errLog.Fatal(err)
-	}
-
-	// Instantiating application's dependencies
-	a := &app{
-		errLogger:     errLog,
-		infoLogger:    infoLog,
-		snippets:      &models.SnippetModel{DB: db},
-		templateCache: templateCache,
-	}
-
-	// Creating a new server and listening in 'addr'
-	server := &http.Server{
-		Addr:     addr,
-		Handler:  a.routes(),
-		ErrorLog: errLog,
-	}
-	infoLog.Printf("Starting server on %s\n", addr)
-	err = server.ListenAndServe()
-	errLog.Fatal(err.Error())
-}
-
-// openDatabase creates a database connection pool and then checks if the database is reachable
-func openDatabase(dsn string) (*sql.DB, error) {
-	// Create a database connection pool
+func openDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
 	}
-
-	// Check connection to the database
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
-
 	return db, nil
+}
+
+func main() {
+	addr := flag.String("addr", ":4000", "HTTP network address")
+	dsn := flag.String(
+		"dsn",
+		"dev:dev@tcp(localhost:3306)/snippetbox?parseTime=true&collation=utf8mb4_unicode_ci",
+		"MySQL data source name",
+	)
+	debug := flag.Bool("debug", false, "Enable debug mode")
+
+	flag.Parse()
+
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	db, err := openDB(*dsn)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+	defer db.Close()
+
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
+	formDecoder := form.NewDecoder()
+
+	sessionManager := scs.New()
+	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
+	app := &application{
+		infoLog:        infoLog,
+		errorLog:       errorLog,
+		snippets:       &models.SnippetModel{DB: db},
+		users:          &models.UserModel{DB: db},
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
+		debug:          *debug,
+	}
+
+	srv := &http.Server{
+		Addr:              *addr,
+		ErrorLog:          errorLog,
+		Handler:           app.routes(),
+		IdleTimeout:       time.Minute,
+		ReadHeaderTimeout: 1 * time.Second,
+		ReadTimeout:       5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+	}
+
+	infoLog.Printf("Starting server on %s", *addr)
+	err = srv.ListenAndServe()
+	errorLog.Fatal(err)
 }

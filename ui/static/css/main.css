@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0;
     font-size: 18px;
-    font-family: "Ubuntu Mono", monospace;
+    font-family: "Inconsolata", monospace;
 }
 
 html, body {
@@ -12,8 +12,8 @@ html, body {
 
 body {
     line-height: 1.5;
-    background-color: #111111;
-    color: #EEEEEE;
+    background-color: #F1F3F6;
+    color: #34495E;
     overflow-y: scroll;
 }
 
@@ -41,7 +41,7 @@ h1 a {
 
 h1 a:hover {
     text-decoration: none;
-    color: #3498db;
+    color: #34495E;
 }
 
 h2 {
@@ -81,7 +81,7 @@ header {
 }
 
 header a {
-    color: #EEEEEE;
+    color: #34495E;
     text-decoration: none;
 }
 
@@ -89,7 +89,7 @@ nav {
     border-bottom: 1px solid #E4E5E7;
     padding-top: 17px;
     padding-bottom: 15px;
-    background: #222222;
+    background: #F7F9FA;
     height: 60px;
     color: #6A6C6F;
 }
@@ -135,11 +135,12 @@ nav a.live:after {
     top: 9px;
     width: 14px;
     height: 14px;
-    background: #111111;
+    background: #F7F9FA;
     border-left: 1px solid #E4E5E7;
     border-bottom: 1px solid #E4E5E7;
     -moz-transform: rotate(45deg);
     -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
 }
 
 a.button, input[type="submit"] {
@@ -233,8 +234,8 @@ button:hover {
 }
 
 .snippet .metadata {
-    background-color: #222222;
-    color: #FFFFFF;
+    background-color: #F7F9FA;
+    color: #6A6C6F;
     padding: 0.75em 18px;
     overflow: auto;
 }
@@ -244,7 +245,7 @@ button:hover {
 }
 
 .snippet .metadata strong {
-    color: #EEEEEE;
+    color: #34495E;
 }
 
 .snippet .metadata time {
@@ -268,10 +269,6 @@ div.flash {
     text-align: center;
 }
 
-pre {
-    background-color: #111111;
-}
-
 div.error {
     color: #FFFFFF;
     background-color: #C0392B;
@@ -282,7 +279,7 @@ div.error {
 }
 
 table {
-    background: #222222;
+    background: white;
     border: 1px solid #E4E5E7;
     border-collapse: collapse;
     width: 100%;
@@ -295,7 +292,7 @@ td, th {
 
 th:last-child, td:last-child {
     text-align: right;
-    color: #EEEEEE;
+    color: #6A6C6F;
 }
 
 tr {
@@ -303,14 +300,14 @@ tr {
 }
 
 tr:nth-child(2n) {
-    background-color: #111111;
+    background-color: #F7F9FA;
 }
 
 footer {
     border-top: 1px solid #E4E5E7;
     padding-top: 17px;
     padding-bottom: 15px;
-    background: #222222;
+    background: #F7F9FA;
     height: 60px;
     color: #6A6C6F;
     text-align: center;
