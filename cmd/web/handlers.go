@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"html/template"
-	"log"
 )
 
-func home(w http.ResponseWriter, r *http.Request) {
+func (a *app) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+        a.notFound(w)
 		return
 	}
 
@@ -21,22 +20,21 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+        a.serverError(w, err)
 		return
 	}
 
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+        a.serverError(w, err)
 	}
 }
 
-func view(w http.ResponseWriter, r *http.Request) {
+func (a *app) view(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Viewing a specific snippet")
 }
 
-func create(w http.ResponseWriter, r *http.Request) {
+func (a *app) create(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		fmt.Fprintf(w, "Creating a snippet")
@@ -44,7 +42,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.Header().Set("Allow", "POST")
 		w.WriteHeader(405)
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		a.clientError(w, http.StatusMethodNotAllowed)
 	}
 }
 
