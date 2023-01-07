@@ -1,57 +1,61 @@
 package main
 
 import (
-	"net/http"
+	"database/sql"
+	"flag"
 	"log"
-    "flag"
-    "os"
-    "database/sql"
-    _ "github.com/lib/pq"
+	"net/http"
+	"os"
+
+	"github.com/felipedavid/not_pastebin/internal/models"
+	_ "github.com/lib/pq"
 )
 
 type app struct {
-    infoLogger *log.Logger
-    errLogger *log.Logger
+	infoLogger *log.Logger
+	errLogger  *log.Logger
+	snippets   *models.SnippetModel
 }
 
 func main() {
-    addr := *flag.String("addr", "127.0.0.1:8000", "HTTP network address")
-    dsn := *flag.String("dsn", "postgres://postgres:postgres@localhost/not_pastebin?sslmode=disable", "Domain service name")
-    flag.Parse()
+	addr := flag.String("addr", "127.0.0.1:8000", "HTTP network address")
+	dsn := flag.String("dsn", "postgres://postgres:postgres@localhost/not_pastebin?sslmode=disable", "Domain service name")
+	flag.Parse()
 
-    errLogger := log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
-    infoLogger := log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime)
+	errLogger := log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
+	infoLogger := log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime)
 
-    db, err := openDB(dsn)
-    if err != nil {
-        errLogger.Fatal(err)
-    }
-    defer db.Close()
+	db, err := openDB(*dsn)
+	if err != nil {
+		errLogger.Fatal(err)
+	}
+	defer db.Close()
 
-    a := app{
-        errLogger: errLogger,
-        infoLogger: infoLogger,
-    }
+	a := app{
+		errLogger:  errLogger,
+		infoLogger: infoLogger,
+		snippets:   &models.SnippetModel{db},
+	}
 
-    s := http.Server{
-        Addr: addr,
-        Handler: a.routes(),
-        ErrorLog: errLogger,
-    }
+	s := http.Server{
+		Addr:     *addr,
+		Handler:  a.routes(),
+		ErrorLog: errLogger,
+	}
 
-	infoLogger.Printf("Starting server on %s\n", addr)
+	infoLogger.Printf("Starting server on %s\n", *addr)
 	err = s.ListenAndServe()
 	errLogger.Fatal(err)
 }
 
 func openDB(dsn string) (*sql.DB, error) {
-    db, err := sql.Open("postgres", dsn)
-    if err != nil {
-        return nil, err
-    }
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		return nil, err
+	}
 
-    if err = db.Ping(); err != nil {
-        return nil, err
-    }
-    return db, nil
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+	return db, nil
 }
