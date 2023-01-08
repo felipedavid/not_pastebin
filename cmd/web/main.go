@@ -31,10 +31,15 @@ func main() {
 	}
 	defer db.Close()
 
+	snippetModel, err := models.NewSnippetModel(db)
+	if err != nil {
+		errLogger.Fatal(err)
+	}
+
 	a := app{
 		errLogger:  errLogger,
 		infoLogger: infoLogger,
-		snippets:   &models.SnippetModel{db},
+		snippets:   snippetModel,
 	}
 
 	s := http.Server{

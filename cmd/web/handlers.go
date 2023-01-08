@@ -1,48 +1,84 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
-	"html/template"
+	"strconv"
+
+	"github.com/felipedavid/not_pastebin/internal/models"
 )
 
 func (a *app) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-        a.notFound(w)
+		a.notFound(w)
 		return
 	}
 
-	files := []string{
-		"./ui/html/base.tmpl",
-		"./ui/html/pages/nav.tmpl",
-		"./ui/html/pages/home.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
+	snippets, err := a.snippets.Latest()
 	if err != nil {
-        a.serverError(w, err)
+		a.serverError(w, err)
 		return
 	}
 
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-        a.serverError(w, err)
+	for _, s := range snippets {
+		fmt.Fprintf(w, "%+v", *s)
 	}
+
+	//files := []string{
+	//	"./ui/html/base.tmpl",
+	//	"./ui/html/pages/nav.tmpl",
+	//	"./ui/html/pages/home.tmpl",
+	//}
+
+	//ts, err := template.ParseFiles(files...)
+	//if err != nil {
+	//	a.serverError(w, err)
+	//	return
+	//}
+
+	//err = ts.ExecuteTemplate(w, "base", nil)
+	//if err != nil {
+	//	a.serverError(w, err)
+	//}
 }
 
 func (a *app) view(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Viewing a specific snippet")
+	switch r.Method {
+	case http.MethodGet:
+		id, err := strconv.Atoi(r.URL.Query().Get("id"))
+		if err != nil || id < 1 {
+			a.notFound(w)
+			return
+		}
+
+		snippet, err := a.snippets.Get(id)
+		if err != nil {
+			if errors.Is(err, models.ErrNoRecord) {
+				a.notFound(w)
+			} else {
+				a.serverError(w, err)
+			}
+			return
+		}
+
+		fmt.Fprintf(w, "%+v", snippet)
+	default:
+		w.Header().Set("Allow", "GET")
+		a.clientError(w, http.StatusMethodNotAllowed)
+	}
 }
 
 func (a *app) create(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		fmt.Fprintf(w, "Creating a snippet")
+		_, err := a.snippets.Insert("Hello there", "No idea", 1)
+		if err != nil {
+			a.serverError(w, err)
+		}
 		return
 	default:
 		w.Header().Set("Allow", "POST")
-		w.WriteHeader(405)
 		a.clientError(w, http.StatusMethodNotAllowed)
 	}
 }
-
