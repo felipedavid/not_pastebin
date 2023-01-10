@@ -63,6 +63,10 @@ func (a *app) view(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		data := &templateData{
+			Snippet: snippet,
+		}
+
 		files := []string{
 			"./ui/html/base.tmpl",
 			"./ui/html/partials/nav.tmpl",
@@ -75,7 +79,7 @@ func (a *app) view(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = ts.ExecuteTemplate(w, "base", snippet)
+		err = ts.ExecuteTemplate(w, "base", data)
 		if err != nil {
 			a.serverError(w, err)
 		}
