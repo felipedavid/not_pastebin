@@ -1,7 +1,7 @@
 package main
 
 import (
-    "net/http"
+	"net/http"
 )
 
 func (a *app) routes() http.Handler {
@@ -14,5 +14,5 @@ func (a *app) routes() http.Handler {
 	mux.HandleFunc("/snippet/view", a.view)
 	mux.HandleFunc("/snippet/create", a.create)
 
-    return mux
+	return secureHeaders(a.logRequest(mux))
 }
