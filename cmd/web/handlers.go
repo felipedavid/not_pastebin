@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -22,26 +21,26 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, s := range snippets {
-		fmt.Fprintf(w, "%+v", *s)
+	data := &templateData{
+		Snippets: snippets,
 	}
 
-	//files := []string{
-	//	"./ui/html/base.tmpl",
-	//	"./ui/html/pages/nav.tmpl",
-	//	"./ui/html/pages/home.tmpl",
-	//}
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/home.tmpl",
+	}
 
-	//ts, err := template.ParseFiles(files...)
-	//if err != nil {
-	//	a.serverError(w, err)
-	//	return
-	//}
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		a.serverError(w, err)
+		return
+	}
 
-	//err = ts.ExecuteTemplate(w, "base", nil)
-	//if err != nil {
-	//	a.serverError(w, err)
-	//}
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		a.serverError(w, err)
+	}
 }
 
 func (a *app) view(w http.ResponseWriter, r *http.Request) {
