@@ -11,7 +11,7 @@ func (a *app) routes() http.Handler {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	mux.HandleFunc("/", a.home)
-	mux.HandleFunc("/snippet/view", a.view)
+	mux.HandleFunc("/snippet/view/", a.view)
 	mux.HandleFunc("/snippet/create", a.create)
 
 	return a.recoverPanic(a.logRequest(secureHeaders(mux)))

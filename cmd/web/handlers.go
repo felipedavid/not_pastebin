@@ -2,8 +2,10 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/felipedavid/not_pastebin/internal/models"
 )
@@ -29,7 +31,14 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 func (a *app) view(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		id, err := strconv.Atoi(r.URL.Query().Get("id"))
+		urlParameters := strings.Split(r.URL.Path, "/")[1:]
+		fmt.Println(urlParameters)
+		if len(urlParameters) < 3 {
+			a.notFound(w)
+			return
+		}
+
+		id, err := strconv.Atoi(urlParameters[2])
 		if err != nil || id < 1 {
 			a.notFound(w)
 			return
