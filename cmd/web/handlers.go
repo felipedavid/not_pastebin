@@ -66,6 +66,9 @@ func (a *app) view(w http.ResponseWriter, r *http.Request) {
 
 func (a *app) create(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+	case http.MethodGet:
+		data := a.newTemplateData()
+		a.render(w, http.StatusOK, "create.tmpl", data)
 	case http.MethodPost:
 		_, err := a.snippets.Insert("Hello there", "No idea", 1)
 		if err != nil {
