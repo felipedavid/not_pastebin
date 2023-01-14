@@ -70,11 +70,27 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 		data := a.newTemplateData()
 		a.render(w, http.StatusOK, "create.tmpl", data)
 	case http.MethodPost:
-		_, err := a.snippets.Insert("Hello there", "No idea", 1)
+		err := r.ParseForm()
+		if err != nil {
+			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		title := r.PostForm.Get("title")
+		content := r.PostForm.Get("content")
+		expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+		if err != nil {
+			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		id, err := a.snippets.Insert(title, content, expires)
 		if err != nil {
 			a.serverError(w, err)
+			return
 		}
-		return
+
+		http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 	default:
 		w.Header().Set("Allow", "POST")
 		a.clientError(w, http.StatusMethodNotAllowed)
