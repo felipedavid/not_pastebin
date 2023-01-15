@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/felipedavid/not_pastebin/internal/models"
 )
@@ -76,11 +77,32 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		fieldErrors := make(map[string]string)
+
 		title := r.PostForm.Get("title")
 		content := r.PostForm.Get("content")
 		expires, err := strconv.Atoi(r.PostForm.Get("expires"))
 		if err != nil {
 			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		if strings.TrimSpace(title) == "" {
+			fieldErrors["title"] = "This field cannot be blank"
+		} else if utf8.RuneCountInString(title) > 100 {
+			fieldErrors["title"] = "This field cannot be more than 100 characters long"
+		}
+
+		if strings.TrimSpace(content) == "" {
+			fieldErrors["content"] = "This field cannot be blank"
+		}
+
+		if expires != 1 && expires != 7 && expires != 365 {
+			fieldErrors["expires"] = "This field must be equal to 1, 7 or 365"
+		}
+
+		if len(fieldErrors) > 0 {
+			fmt.Fprint(w, fieldErrors)
 			return
 		}
 
