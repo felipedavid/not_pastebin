@@ -3,18 +3,27 @@
 {{define "main"}}
 <form action="/snippet/create" method="POST">
     <div>
+        {{with .Form.FieldErrors.title}}
+            <label class="error">{{.}}</label>
+        {{end}}
         <label>Title:</label>
-        <input type="text" name="title">
+        <input type="text" name="title" value="{{.Form.Title}}">
     </div>
     <div>
+        {{with .Form.FieldErrors.content}}
+            <label class="error">{{.}}</label>
+        {{end}}
         <label>Content:</label>
-        <textarea name="content"></textarea>
+        <textarea name="content">{{.Form.Content}}</textarea>
     </div>
     <div>
+        {{with .Form.FieldErrors.expires}}
+            <label class="error">{{.}}</label>
+        {{end}}
         <label>Delete in:</label>
-        <input type="radio" name="expires" value="365" checked> One Year
-        <input type="radio" name="expires" value="7" checked> One Week
-        <input type="radio" name="expires" value="1" checked> One Day
+        <input type="radio" name="expires" value="365" {{if (eq .Form.Expires 365)}}checked{{end}}> One Year
+        <input type="radio" name="expires" value="7" {{if (eq .Form.Expires 7)}}checked{{end}}> One Week
+        <input type="radio" name="expires" value="1" {{if (eq .Form.Expires 1)}}checked{{end}}> One Day
     </div>
     <div>
         <input type="submit" value="Publish snippet">

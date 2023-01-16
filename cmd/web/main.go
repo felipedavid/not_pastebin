@@ -22,7 +22,8 @@ type app struct {
 func main() {
 	addr := flag.String("addr", "127.0.0.1:8000", "HTTP network address")
 	dsn := flag.String("dsn",
-		"postgres://postgres:postgres@localhost/not_pastebin?sslmode=disable", "Domain service name")
+		"postgres://postgres:postgres@localhost/not_pastebin?sslmode=disable", 
+        "Domain service name")
 	flag.Parse()
 
 	errLogger := log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)

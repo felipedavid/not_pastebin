@@ -12,11 +12,15 @@ type templateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+	Form        any
 }
 
 func (a *app) newTemplateData() *templateData {
 	return &templateData{
 		CurrentYear: time.Now().Year(),
+		Form: snippetCreateForm{
+			Expires: 1,
+		},
 	}
 }
 
