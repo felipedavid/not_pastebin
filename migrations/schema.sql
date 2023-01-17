@@ -17,3 +17,11 @@ INSERT INTO snippets (title, content, expires) VALUES (
 	'Over the wintry forest',
 	'Over the wintry\nforest, winds howl in rage.',
 	NOW() + INTERVAL '365 day');
+
+CREATE TABLE sessions (
+    token VARCHAR(43) PRIMARY KEY,
+    data BYTEA NOT NULL,
+    expiry TIMESTAMP NOT NULL
+);
+
+CREATE INDEX sessions_expiry_idx ON sessions(expiry);
