@@ -23,7 +23,7 @@ func (a *app) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := a.newTemplateData()
+	data := a.newTemplateData(r)
 	data.Snippets = snippets
 
 	a.render(w, http.StatusOK, "home.tmpl", data)
@@ -54,7 +54,7 @@ func (a *app) view(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		data := a.newTemplateData()
+		data := a.newTemplateData(r)
 		data.Snippet = snippet
 
 		a.render(w, http.StatusOK, "view.tmpl", data)
@@ -74,7 +74,7 @@ type snippetCreateForm struct {
 func (a *app) create(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		data := a.newTemplateData()
+		data := a.newTemplateData(r)
 		a.render(w, http.StatusOK, "create.tmpl", data)
 	case http.MethodPost:
 		err := r.ParseForm()
@@ -104,7 +104,7 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
             "This field must be equal to 1, 7 or 365")
 
 		if !form.Valid() {
-			data := a.newTemplateData()
+			data := a.newTemplateData(r)
 			data.Form = form
 			a.render(w, http.StatusUnprocessableEntity, "create.tmpl", data)
 			return
@@ -115,6 +115,8 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 			a.serverError(w, err)
 			return
 		}
+
+        a.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 
 		http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 	default:

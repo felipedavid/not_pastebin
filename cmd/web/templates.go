@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"path/filepath"
 	"time"
+    "net/http"
 
 	"github.com/felipedavid/not_pastebin/internal/models"
 )
@@ -13,11 +14,13 @@ type templateData struct {
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
 	Form        any
+    Flash       string
 }
 
-func (a *app) newTemplateData() *templateData {
+func (a *app) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
 		CurrentYear: time.Now().Year(),
+        Flash: a.sessionManager.PopString(r.Context(), "flash"),
 		Form: snippetCreateForm{
 			Expires: 1,
 		},

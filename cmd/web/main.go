@@ -7,16 +7,20 @@ import (
 	"log"
 	"net/http"
 	"os"
+    "time"
 
 	"github.com/felipedavid/not_pastebin/internal/models"
 	_ "github.com/lib/pq"
+    "github.com/alexedwards/scs/postgresstore"
+    "github.com/alexedwards/scs/v2"
 )
 
 type app struct {
-	infoLogger    *log.Logger
-	errLogger     *log.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
+	infoLogger     *log.Logger
+	errLogger      *log.Logger
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
+    sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -29,6 +33,7 @@ func main() {
 	errLogger := log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLogger := log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime)
 
+    // Setup the database
 	db, err := openDB(*dsn)
 	if err != nil {
 		errLogger.Fatal(err)
@@ -45,11 +50,17 @@ func main() {
 		errLogger.Fatal(err)
 	}
 
+    // Setup sessions
+    sessionManager := scs.New()
+    sessionManager.Store = postgresstore.New(db)
+    sessionManager.Lifetime = 12 * time.Hour
+
 	a := app{
 		errLogger:     errLogger,
 		infoLogger:    infoLogger,
 		snippets:      snippetModel,
 		templateCache: tc,
+        sessionManager: sessionManager,
 	}
 
 	s := http.Server{
