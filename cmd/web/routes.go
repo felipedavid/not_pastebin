@@ -11,6 +11,7 @@ func (a *app) routes() http.Handler {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	mux.Handle("/", a.loadAndSave(a.home))
+    mux.Handle("/about", a.loadAndSave(a.about))
 	mux.Handle("/snippet/view/", a.loadAndSave(a.view))
 	mux.Handle("/snippet/create", a.loadAndSave(a.create))
 

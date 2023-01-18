@@ -124,3 +124,14 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 		a.clientError(w, http.StatusMethodNotAllowed)
 	}
 }
+
+func (a *app) about(w http.ResponseWriter, r *http.Request) {
+    switch r.Method {
+    case http.MethodGet:
+        data := a.newTemplateData(r)
+        a.render(w, http.StatusOK, "about.tmpl", data)
+    default:
+		w.Header().Set("Allow", "POST")
+		a.clientError(w, http.StatusMethodNotAllowed)
+    }
+}
