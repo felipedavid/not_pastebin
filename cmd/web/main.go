@@ -16,6 +16,7 @@ import (
 )
 
 type app struct {
+    debugMode      bool
 	infoLogger     *log.Logger
 	errLogger      *log.Logger
 	snippets       *models.SnippetModel
@@ -28,6 +29,7 @@ func main() {
 	dsn := flag.String("dsn",
 		"postgres://postgres:postgres@localhost/not_pastebin?sslmode=disable", 
         "Domain service name")
+    debug := flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 
 	errLogger := log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
@@ -56,6 +58,7 @@ func main() {
     sessionManager.Lifetime = 12 * time.Hour
 
 	a := app{
+        debugMode:     *debug,
 		errLogger:     errLogger,
 		infoLogger:    infoLogger,
 		snippets:      snippetModel,
