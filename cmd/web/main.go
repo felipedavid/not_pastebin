@@ -7,35 +7,35 @@ import (
 	"log"
 	"net/http"
 	"os"
-    "time"
+	"time"
 
+	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/felipedavid/not_pastebin/internal/models"
 	_ "github.com/lib/pq"
-    "github.com/alexedwards/scs/postgresstore"
-    "github.com/alexedwards/scs/v2"
 )
 
 type app struct {
-    debugMode      bool
+	debugMode      bool
 	infoLogger     *log.Logger
 	errLogger      *log.Logger
 	snippets       *models.SnippetModel
 	templateCache  map[string]*template.Template
-    sessionManager *scs.SessionManager
+	sessionManager *scs.SessionManager
 }
 
 func main() {
 	addr := flag.String("addr", "127.0.0.1:8000", "HTTP network address")
 	dsn := flag.String("dsn",
-		"postgres://postgres:postgres@localhost/not_pastebin?sslmode=disable", 
-        "Domain service name")
-    debug := flag.Bool("debug", false, "Debug mode")
+		"postgres://postgres:postgres@localhost/not_pastebin?sslmode=disable",
+		"Domain service name")
+	debug := flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 
 	errLogger := log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLogger := log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime)
 
-    // Setup the database
+	// Setup the database
 	db, err := openDB(*dsn)
 	if err != nil {
 		errLogger.Fatal(err)
@@ -52,18 +52,19 @@ func main() {
 		errLogger.Fatal(err)
 	}
 
-    // Setup sessions
-    sessionManager := scs.New()
-    sessionManager.Store = postgresstore.New(db)
-    sessionManager.Lifetime = 12 * time.Hour
+	// Setup sessions
+	sessionManager := scs.New()
+	sessionManager.Store = postgresstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.Secure = true
 
 	a := app{
-        debugMode:     *debug,
-		errLogger:     errLogger,
-		infoLogger:    infoLogger,
-		snippets:      snippetModel,
-		templateCache: tc,
-        sessionManager: sessionManager,
+		debugMode:      *debug,
+		errLogger:      errLogger,
+		infoLogger:     infoLogger,
+		snippets:       snippetModel,
+		templateCache:  tc,
+		sessionManager: sessionManager,
 	}
 
 	s := http.Server{
@@ -73,7 +74,7 @@ func main() {
 	}
 
 	infoLogger.Printf("Starting server on %s\n", *addr)
-	err = s.ListenAndServe()
+	err = s.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errLogger.Fatal(err)
 }
 
