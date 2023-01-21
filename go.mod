@@ -7,3 +7,5 @@ require (
 	github.com/alexedwards/scs/v2 v2.5.0
 	github.com/lib/pq v1.10.7
 )
+
+require golang.org/x/crypto v0.5.0 // indirect

@@ -176,7 +176,19 @@ func (a *app) signup(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Fprintf(w, "creating a new user :3")
+		err = a.users.Insert(form.Name, form.Email, form.Password)
+		form.CheckField(!errors.Is(err, models.ErrDuplicateEmail), "email", "Email already exists")
+
+		if !form.Valid() {
+			data := a.newTemplateData(r)
+			data.Form = form
+			a.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+			return
+		}
+
+		a.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
 		w.Header().Set("Allow", "GET, POST")
 		a.clientError(w, http.StatusMethodNotAllowed)
