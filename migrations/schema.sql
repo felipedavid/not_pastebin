@@ -31,7 +31,7 @@ CREATE TABLE users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     hashed_password CHAR(60) NOT NULL,
-    created TIMESTAMP NOT NULL
+    created TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE users ADD CONSTRAINT users_email_uc UNIQUE (email);
