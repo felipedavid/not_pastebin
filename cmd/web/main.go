@@ -21,6 +21,7 @@ type app struct {
 	infoLogger     *log.Logger
 	errLogger      *log.Logger
 	snippets       *models.SnippetModel
+	users          *models.UserModel
 	templateCache  map[string]*template.Template
 	sessionManager *scs.SessionManager
 }
@@ -48,6 +49,11 @@ func main() {
 		errLogger.Fatal(err)
 	}
 
+	userModel, err := models.NewUserModel(db)
+	if err != nil {
+		errLogger.Fatal(err)
+	}
+
 	tc, err := newTemplateCache()
 	if err != nil {
 		errLogger.Fatal(err)
@@ -64,6 +70,7 @@ func main() {
 		errLogger:      errLogger,
 		infoLogger:     infoLogger,
 		snippets:       snippetModel,
+		users:          userModel,
 		templateCache:  tc,
 		sessionManager: sessionManager,
 	}

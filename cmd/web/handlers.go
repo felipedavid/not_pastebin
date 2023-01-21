@@ -65,10 +65,10 @@ func (a *app) view(w http.ResponseWriter, r *http.Request) {
 }
 
 type snippetCreateForm struct {
-	Title       string
-	Content     string
-	Expires     int
-    validator.Validator
+	Title   string
+	Content string
+	Expires int
+	validator.Validator
 }
 
 func (a *app) create(w http.ResponseWriter, r *http.Request) {
@@ -90,18 +90,18 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 		}
 
 		form := snippetCreateForm{
-			Title:       r.PostForm.Get("title"),
-			Content:     r.PostForm.Get("content"),
-			Expires:     expires,
+			Title:   r.PostForm.Get("title"),
+			Content: r.PostForm.Get("content"),
+			Expires: expires,
 		}
 
-        form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
-        form.CheckField(validator.MaxChars(form.Title, 100), "title", 
-            "This field cannot be more than 100 characters long")
-        form.CheckField(validator.NotBlank(form.Content), "content", 
-            "This field cannot be blank")
-        form.CheckField(validator.PermittedInt(expires, 1, 7, 365), "expires", 
-            "This field must be equal to 1, 7 or 365")
+		form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+		form.CheckField(validator.MaxChars(form.Title, 100), "title",
+			"This field cannot be more than 100 characters long")
+		form.CheckField(validator.NotBlank(form.Content), "content",
+			"This field cannot be blank")
+		form.CheckField(validator.PermittedInt(expires, 1, 7, 365), "expires",
+			"This field must be equal to 1, 7 or 365")
 
 		if !form.Valid() {
 			data := a.newTemplateData(r)
@@ -116,22 +116,88 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-        a.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
+		a.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 
 		http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
+	default:
+		w.Header().Set("Allow", "GET, POST")
+		a.clientError(w, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *app) about(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		data := a.newTemplateData(r)
+		a.render(w, http.StatusOK, "about.tmpl", data)
 	default:
 		w.Header().Set("Allow", "POST")
 		a.clientError(w, http.StatusMethodNotAllowed)
 	}
 }
 
-func (a *app) about(w http.ResponseWriter, r *http.Request) {
-    switch r.Method {
-    case http.MethodGet:
-        data := a.newTemplateData(r)
-        a.render(w, http.StatusOK, "about.tmpl", data)
-    default:
+type userSignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
+func (a *app) signup(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		data := a.newTemplateData(r)
+		data.Form = userSignupForm{}
+		a.render(w, http.StatusOK, "signup.tmpl", data)
+	case http.MethodPost:
+		err := r.ParseForm()
+		if err != nil {
+			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		form := userSignupForm{
+			Name:     r.PostForm.Get("name"),
+			Email:    r.PostForm.Get("email"),
+			Password: r.PostForm.Get("password"),
+		}
+
+		form.CheckField(validator.NotBlank(form.Name), "name", "Name cannot be blank")
+		form.CheckField(validator.NotBlank(form.Email), "email", "Email cannot be blank")
+		form.CheckField(validator.Matches(form.Email, validator.EmailRegex), "email",
+			"Insert a valid email format")
+		form.CheckField(validator.MinChars(form.Password, 8), "password",
+			"Your password should be at least 8 characters long")
+
+		if !form.Valid() {
+			data := a.newTemplateData(r)
+			data.Form = form
+			a.render(w, http.StatusUnprocessableEntity, "signup.tmpl", data)
+			return
+		}
+
+		fmt.Fprintf(w, "creating a new user :3")
+	default:
+		w.Header().Set("Allow", "GET, POST")
+		a.clientError(w, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *app) login(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+	case http.MethodPost:
+	default:
+		w.Header().Set("Allow", "GET, POST")
+		a.clientError(w, http.StatusMethodNotAllowed)
+	}
+}
+
+func (a *app) logout(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+	default:
 		w.Header().Set("Allow", "POST")
 		a.clientError(w, http.StatusMethodNotAllowed)
-    }
+	}
 }

@@ -10,11 +10,11 @@ import (
 func (a *app) serverError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	a.errLogger.Output(2, trace)
-    if a.debugMode {
-        http.Error(w, trace, http.StatusInternalServerError)
-        return
-    }
-    http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	if a.debugMode {
+		http.Error(w, trace, http.StatusInternalServerError)
+		return
+	}
+	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
 func (a *app) clientError(w http.ResponseWriter, status int) {
@@ -25,6 +25,7 @@ func (a *app) notFound(w http.ResponseWriter) {
 	a.clientError(w, http.StatusNotFound)
 }
 
+// render gets the template from the template cache, executes it, and write the result to the client
 func (a *app) render(w http.ResponseWriter, status int, page string, data *templateData) {
 	ts, ok := a.templateCache[page]
 	if !ok {
