@@ -195,10 +195,38 @@ func (a *app) signup(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type userLoginForm struct {
+	Email               string `form:"email"`
+	Password            string `form:"password"`
+	validator.Validator `form:"-"`
+}
+
 func (a *app) login(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
+		data := a.newTemplateData(r)
+		data.Form = userLoginForm{}
+		a.render(w, http.StatusOK, "login.tmpl", data)
 	case http.MethodPost:
+		err := r.ParseForm()
+		if err != nil {
+			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		form := userLoginForm{
+			Email:    r.PostForm.Get("email"),
+			Password: r.PostForm.Get("password"),
+		}
+
+		form.CheckField(validator.NotBlank(form.Email), "email", "Please inform your email")
+		form.CheckField(validator.Matches(form.Email, validator.EmailRegex), "email", "Please inform a valid email")
+		form.CheckField(validator.NotBlank(form.Password), "password", "Please inform your password")
+
+		id, err := a.users.Authenticate(form.email, form.password)
+		if err != nil {
+
+		}
 	default:
 		w.Header().Set("Allow", "GET, POST")
 		a.clientError(w, http.StatusMethodNotAllowed)
