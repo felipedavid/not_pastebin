@@ -188,7 +188,7 @@ func (a *app) signup(w http.ResponseWriter, r *http.Request) {
 
 		a.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
 
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 	default:
 		w.Header().Set("Allow", "GET, POST")
 		a.clientError(w, http.StatusMethodNotAllowed)
@@ -220,13 +220,37 @@ func (a *app) login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		form.CheckField(validator.NotBlank(form.Email), "email", "Please inform your email")
-		form.CheckField(validator.Matches(form.Email, validator.EmailRegex), "email", "Please inform a valid email")
+		form.CheckField(validator.Matches(form.Email, validator.EmailRegex), "email", "Invalid email")
 		form.CheckField(validator.NotBlank(form.Password), "password", "Please inform your password")
 
-		id, err := a.users.Authenticate(form.email, form.password)
+		id, err := a.users.Authenticate(form.Email, form.Password)
 		if err != nil {
-
+			if errors.Is(err, models.ErrInvalidEmail) {
+				form.AddFieldError("email", "Email not registered")
+				data := a.newTemplateData(r)
+				data.Form = form
+				a.render(w, http.StatusOK, "login.tmpl", data)
+			} else if errors.Is(err, models.ErrInvalidPassword) {
+				form.AddFieldError("password", "Invalid password")
+				data := a.newTemplateData(r)
+				data.Form = form
+				a.render(w, http.StatusOK, "login.tmpl", data)
+			} else {
+				a.serverError(w, err)
+			}
+			return
 		}
+
+		err = a.sessionManager.RenewToken(r.Context())
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		a.sessionManager.Put(r.Context(), "authenticatedUserID", id)
+		a.sessionManager.Put(r.Context(), "flash", "Welcome back :)")
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
 		w.Header().Set("Allow", "GET, POST")
 		a.clientError(w, http.StatusMethodNotAllowed)
