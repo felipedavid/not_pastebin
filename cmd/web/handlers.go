@@ -260,6 +260,16 @@ func (a *app) login(w http.ResponseWriter, r *http.Request) {
 func (a *app) logout(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
+		err := a.sessionManager.RenewToken(r.Context())
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		a.sessionManager.Remove(r.Context(), "authenticatedUserID")
+		a.sessionManager.Put(r.Context(), "flash", "Logged out!")
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
 		w.Header().Set("Allow", "POST")
 		a.clientError(w, http.StatusMethodNotAllowed)
