@@ -260,6 +260,11 @@ func (a *app) login(w http.ResponseWriter, r *http.Request) {
 func (a *app) logout(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
+		if !a.isAuthenticated(r) {
+			a.clientError(w, http.StatusUnauthorized)
+			return
+		}
+
 		err := a.sessionManager.RenewToken(r.Context())
 		if err != nil {
 			a.serverError(w, err)

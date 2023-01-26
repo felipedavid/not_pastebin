@@ -39,3 +39,19 @@ func (a *app) recoverPanic(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (a *app) requireAuthentication(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !a.isAuthenticated(r) {
+			a.sessionManager.Put(r.Context(), "flash", "You need to login first")
+			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+			return
+		}
+
+		// Make sure not authenticated users cannot have pagest that require
+		// authentication cached by the browser
+		w.Header().Set("Cache-Control", "no-store")
+
+		next.ServeHTTP(w, r)
+	})
+}

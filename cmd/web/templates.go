@@ -2,28 +2,30 @@ package main
 
 import (
 	"html/template"
+	"net/http"
 	"path/filepath"
 	"time"
-    "net/http"
 
 	"github.com/felipedavid/not_pastebin/internal/models"
 )
 
 type templateData struct {
-	CurrentYear int
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-	Form        any
-    Flash       string
+	CurrentYear       int
+	Snippet           *models.Snippet
+	Snippets          []*models.Snippet
+	Form              any
+	Flash             string
+	AuthenticatedUser bool
 }
 
 func (a *app) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
 		CurrentYear: time.Now().Year(),
-        Flash: a.sessionManager.PopString(r.Context(), "flash"),
+		Flash:       a.sessionManager.PopString(r.Context(), "flash"),
 		Form: snippetCreateForm{
 			Expires: 1,
 		},
+		AuthenticatedUser: a.isAuthenticated(r),
 	}
 }
 
