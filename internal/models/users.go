@@ -20,8 +20,9 @@ type User struct {
 type UserModel struct {
 	DB         *sql.DB
 	insertStmt *sql.Stmt
-	getStmt    *sql.Stmt
+	authStmt   *sql.Stmt
 	existsStmt *sql.Stmt
+	getStmt    *sql.Stmt
 }
 
 func NewUserModel(db *sql.DB) (*UserModel, error) {
@@ -30,7 +31,7 @@ func NewUserModel(db *sql.DB) (*UserModel, error) {
 		return nil, err
 	}
 
-	getStmt, err := db.Prepare(`SELECT id, hashed_password FROM users WHERE email = $1`)
+	authStmt, err := db.Prepare(`SELECT id, hashed_password FROM users WHERE email = $1`)
 	if err != nil {
 		return nil, err
 	}
@@ -40,11 +41,17 @@ func NewUserModel(db *sql.DB) (*UserModel, error) {
 		return nil, err
 	}
 
+	getStmt, err := db.Prepare(`SELECT name, email, created from users WHERE id = $1`)
+	if err != nil {
+		return nil, err
+	}
+
 	return &UserModel{
 		DB:         db,
 		insertStmt: insertStmt,
-		getStmt:    getStmt,
+		authStmt:   authStmt,
 		existsStmt: existsStmt,
+		getStmt:    getStmt,
 	}, nil
 }
 
@@ -72,7 +79,7 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	var id int
 	var hashedPassword []byte
 
-	err := m.getStmt.QueryRow(email).Scan(&id, &hashedPassword)
+	err := m.authStmt.QueryRow(email).Scan(&id, &hashedPassword)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, ErrInvalidEmail
@@ -100,4 +107,18 @@ func (m *UserModel) Exists(id int) (bool, error) {
 	}
 
 	return exists, nil
+}
+
+func (m *UserModel) Get(id int) (*User, error) {
+	var user User
+
+	err := m.getStmt.QueryRow(id).Scan(&user.Name, &user.Email, &user.Created)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNoRecord
+		}
+		return nil, err
+	}
+
+	return &user, nil
 }

@@ -16,6 +16,7 @@ type templateData struct {
 	Form              any
 	Flash             string
 	AuthenticatedUser bool
+	User              *models.User
 }
 
 func (a *app) newTemplateData(r *http.Request) *templateData {

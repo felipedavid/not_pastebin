@@ -17,9 +17,10 @@ func (a *app) routes() http.Handler {
 	mux.Handle("/user/signup", a.loadAndSave(a.authenticate(http.HandlerFunc(a.signup))))
 	mux.Handle("/user/login", a.loadAndSave(a.authenticate(http.HandlerFunc(a.login))))
 	mux.Handle("/user/logout", a.loadAndSave(a.authenticate(http.HandlerFunc(a.logout))))
+	mux.Handle("/user/info/", a.loadAndSave(a.authenticate(a.requireAuthentication(http.HandlerFunc(a.userInfo)))))
 
 	mux.Handle("/snippet/create",
-		a.sessionManager.LoadAndSave(a.authenticate(a.requireAuthentication(http.HandlerFunc(a.create)))))
+		a.loadAndSave(a.authenticate(a.requireAuthentication(http.HandlerFunc(a.create)))))
 
 	return a.recoverPanic(a.logRequest(secureHeaders(mux)))
 }

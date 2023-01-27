@@ -280,3 +280,28 @@ func (a *app) logout(w http.ResponseWriter, r *http.Request) {
 		a.clientError(w, http.StatusMethodNotAllowed)
 	}
 }
+
+func (a *app) userInfo(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		id := a.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		if id == 0 {
+			a.serverError(w, nil)
+			return
+		}
+
+		user, err := a.users.Get(id)
+		if err != nil {
+			a.serverError(w, nil)
+			return
+		}
+
+		data := a.newTemplateData(r)
+		data.User = user
+
+		a.render(w, http.StatusOK, "account.tmpl", data)
+	default:
+		w.Header().Set("Allow", "GET")
+		a.clientError(w, http.StatusMethodNotAllowed)
+	}
+}
