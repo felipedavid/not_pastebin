@@ -18,11 +18,13 @@ type User struct {
 }
 
 type UserModel struct {
-	DB         *sql.DB
-	insertStmt *sql.Stmt
-	authStmt   *sql.Stmt
-	existsStmt *sql.Stmt
-	getStmt    *sql.Stmt
+	DB          *sql.DB
+	insertStmt  *sql.Stmt
+	authStmt    *sql.Stmt
+	existsStmt  *sql.Stmt
+	getStmt     *sql.Stmt
+	getPassStmt *sql.Stmt
+	setPassStmt *sql.Stmt
 }
 
 func NewUserModel(db *sql.DB) (*UserModel, error) {
@@ -46,12 +48,24 @@ func NewUserModel(db *sql.DB) (*UserModel, error) {
 		return nil, err
 	}
 
+	getPassStmt, err := db.Prepare(`SELECT hashed_password FROM users WHERE id = $1`)
+	if err != nil {
+		return nil, err
+	}
+
+	setPassStmt, err := db.Prepare(`UPDATE users SET hashed_password = $1 WHERE id = $2`)
+	if err != nil {
+		return nil, err
+	}
+
 	return &UserModel{
-		DB:         db,
-		insertStmt: insertStmt,
-		authStmt:   authStmt,
-		existsStmt: existsStmt,
-		getStmt:    getStmt,
+		DB:          db,
+		insertStmt:  insertStmt,
+		authStmt:    authStmt,
+		existsStmt:  existsStmt,
+		getStmt:     getStmt,
+		getPassStmt: getPassStmt,
+		setPassStmt: setPassStmt,
 	}, nil
 }
 
@@ -121,4 +135,37 @@ func (m *UserModel) Get(id int) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func (m *UserModel) PasswordMatch(id int, password string) (bool, error) {
+	var hashedPassword []byte
+
+	err := m.getPassStmt.QueryRow(id).Scan(&hashedPassword)
+	if err != nil {
+		return false, nil
+	}
+
+	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return false, ErrInvalidPassword
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (m *UserModel) SetPassword(id int, newPassword string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.setPassStmt.Exec(id, hashedPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

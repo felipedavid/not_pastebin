@@ -305,3 +305,76 @@ func (a *app) userInfo(w http.ResponseWriter, r *http.Request) {
 		a.clientError(w, http.StatusMethodNotAllowed)
 	}
 }
+
+type changePasswordForm struct {
+	CurrentPassword         string `form:"current_password"`
+	NewPassword             string `form:"new_password"`
+	NewPasswordConfirmation string `form:"new_password_confirmation"`
+	validator.Validator
+}
+
+func (a *app) changePassword(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		data := a.newTemplateData(r)
+		a.render(w, http.StatusOK, "change_password.tmpl", data)
+	case http.MethodPost:
+		err := r.ParseForm()
+		if err != nil {
+			a.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		form := changePasswordForm{
+			CurrentPassword:         r.PostForm.Get("current_password"),
+			NewPassword:             r.PostForm.Get("new_password"),
+			NewPasswordConfirmation: r.PostForm.Get("new_password_confirmation"),
+		}
+
+		form.CheckField(validator.NotBlank(form.CurrentPassword), "current_password",
+			"This field cannot be blank")
+		form.CheckField(validator.NotBlank(form.NewPassword), "new_password",
+			"This field cannot be blank")
+		form.CheckField(validator.NotBlank(form.NewPasswordConfirmation), "new_password_confirmation",
+			"This field cannot be blank")
+		form.CheckField(validator.MinChars(form.NewPassword, 8), "new_password",
+			"Your password should be at least 8 characters long")
+		form.CheckField(validator.MinChars(form.NewPasswordConfirmation, 8), "new_password_confirmation",
+			"Your password should be at least 8 characters long")
+		form.CheckField(form.NewPassword == form.NewPasswordConfirmation, "new_password",
+			"New password and confirmation don't match")
+
+		id := a.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		if id == 0 {
+			a.serverError(w, nil)
+			return
+		}
+		passMatch, err := a.users.PasswordMatch(id, form.CurrentPassword)
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+		form.CheckField(passMatch, "current_password",
+			"Invalid Password")
+
+		if !form.Valid() {
+			data := a.newTemplateData(r)
+			data.Form = form
+			a.render(w, http.StatusUnprocessableEntity, "change_password.tmpl", data)
+			return
+		}
+
+		err = a.users.SetPassword(id, form.NewPassword)
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		a.sessionManager.Put(r.Context(), "flash", "Password changed successfully!")
+
+		http.Redirect(w, r, "/user/info", http.StatusSeeOther)
+	default:
+		w.Header().Set("Allow", "GET, POST")
+		a.clientError(w, http.StatusMethodNotAllowed)
+	}
+}
