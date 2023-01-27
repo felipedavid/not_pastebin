@@ -21,6 +21,7 @@ type UserModel struct {
 	DB         *sql.DB
 	insertStmt *sql.Stmt
 	getStmt    *sql.Stmt
+	existsStmt *sql.Stmt
 }
 
 func NewUserModel(db *sql.DB) (*UserModel, error) {
@@ -34,10 +35,16 @@ func NewUserModel(db *sql.DB) (*UserModel, error) {
 		return nil, err
 	}
 
+	existsStmt, err := db.Prepare(`SELECT EXISTS(SELECT true FROM users WHERE id = $1)`)
+	if err != nil {
+		return nil, err
+	}
+
 	return &UserModel{
 		DB:         db,
 		insertStmt: insertStmt,
 		getStmt:    getStmt,
+		existsStmt: existsStmt,
 	}, nil
 }
 
@@ -85,5 +92,12 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 }
 
 func (m *UserModel) Exists(id int) (bool, error) {
-	return false, nil
+	var exists bool
+
+	err := m.existsStmt.QueryRow(id).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }
