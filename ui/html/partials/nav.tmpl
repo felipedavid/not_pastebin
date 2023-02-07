@@ -1,22 +1,18 @@
 {{define "nav"}}
-<nav>
-	<div>
-		<a href="/">Home</a>
-		<a href="/about">About</a>
-		{{if .AuthenticatedUser}}
-			<a href="/snippet/create">Create snippet</a>
-		{{end}}
-	</div>
-	<div>
-		{{if .AuthenticatedUser}}
-			<a href="/user/info">Account</a>
-			<form action="/user/logout" method="POST">
-				<button>Logout</button>
-			</form>
-		{{else}}
-			<a href="/user/signup">Sign up</a>
-			<a href="/user/login">Login</a>
-		{{end}}
-	</div>
-</nav>
+	<nav>
+		<a id="logo" href="/">Not Pastebin</a>
+		<ul class="nav_links">
+			<li><a href="/">Home</a></li>
+			<li><a href="/snippet/create">Create</a></li>
+			<li><a href="/about">About</a></li>
+		</ul>
+		<ul class="nav_links">
+			{{if .AuthenticatedUser}}
+				<li id="login"><a href="/user/info">Account</a></li>
+			{{else}}
+				<li><a href="/user/signup">Sign up</a></li>
+				<li id="login"><a href="/user/login">Login</a></li>
+			{{end}}
+		</ul>
+	</nav>
 {{end}}

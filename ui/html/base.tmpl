@@ -6,12 +6,9 @@
 	<title>{{template "title" .}} - Not Pastebin</title>
 	<link rel='stylesheet' href='/static/css/main.css'>
 	<link rel='shortcut icon' href='/static/img/favicon.ico' type='image/x-icon'>
-	<!-- Also link to some fonts hosted by Google -->
-	<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700'>
 </head>
 <body>
 	<header>
-		<h1><a href="/">Not Pastebin</a></h1>
 		{{template "nav" .}}
 	</header>
 	<main>
@@ -20,7 +17,7 @@
         {{end}}
 		{{template "main" .}}
 	</main>
-    <footer>Powered by <a href="https://go.dev">Go</a> in {{.CurrentYear}} </footer>
+    <footer>Hi there, how it's going? :3</footer>
 </body>
 </html>
 {{end}}

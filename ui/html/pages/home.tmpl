@@ -2,19 +2,23 @@
 
 {{define "main"}}
     {{if .Snippets}}
-    <table>
+    <table id="snippets_table">
+        <thead>
         <tr>
-            <td>Title</td>
-            <td>Created</td>
-            <td>ID</td>
+            <th>Title</th>
+            <th>Created</th>
+            <th>ID</th>
         </tr>
+        </thead>
+        <tbody>
         {{range .Snippets}}
         <tr>
-            <td><a href="/snippet/view/{{.ID}}">{{.Title}}</a></td>
+            <td>{{.Title}}</td>
             <td>{{humanDate .Created}}</td>
             <td>{{.ID}}</td>
         </tr>
         {{end}}
+        </tbody>
     </table>
     {{else}}
         <p>There's nothing to see here... yet!</p>
