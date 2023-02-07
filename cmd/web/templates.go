@@ -38,6 +38,7 @@ var functions = template.FuncMap{
 	"humanDate": humanDate,
 }
 
+// newTemplateCache returns a map containing all templates pre-parsed
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 

@@ -27,6 +27,8 @@ type UserModel struct {
 	setPassStmt *sql.Stmt
 }
 
+// NewUserModel allocates a new UserModel object and initializes it
+// with all pre-compiled statements that query the user table
 func NewUserModel(db *sql.DB) (*UserModel, error) {
 	insertStmt, err := db.Prepare(`INSERT INTO users (name, email, hashed_password) VALUES ($1, $2, $3)`)
 	if err != nil {
