@@ -24,9 +24,8 @@ type SnippetModel struct {
 // NewSnippetModel allocates a new SnippetModel object and initializes it
 // with all pre-compiled statements that query the snippets table
 func NewSnippetModel(db *sql.DB) (*SnippetModel, error) {
-	// TODO: Fix expiration date
 	insertStmt, err := db.Prepare(`INSERT INTO snippets (title, content, expires) VALUES
-		($1, $2, $3) RETURNING id`)
+		($1, $2, current_date+$3::INT) RETURNING id`)
 	if err != nil {
 		return nil, err
 	}
