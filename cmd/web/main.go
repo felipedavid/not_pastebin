@@ -39,6 +39,10 @@ func main() {
 	errLogger := log.New(os.Stderr, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLogger := log.New(os.Stdout, "[INFO] ", log.Ldate|log.Ltime)
 
+	if *debug {
+		infoLogger.Println("Starting the application in debug mode")
+	}
+
 	/* Setting up the database */
 	db, err := openDB(*dsn)
 	if err != nil {

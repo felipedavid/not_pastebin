@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"net/http"
 	"runtime/debug"
 )
@@ -27,11 +28,34 @@ func (a *app) notFound(w http.ResponseWriter) {
 
 // render gets the template from the template cache, executes it, and write the result to the client
 func (a *app) render(w http.ResponseWriter, status int, page string, data *templateData) {
-	ts, ok := a.templateCache[page]
-	if !ok {
-		err := fmt.Errorf("the template %s does not exist", page)
-		a.serverError(w, err)
-		return
+	// if the application is in debug mode, don't use the template cache
+	var ts *template.Template
+	if a.debugMode {
+		ts, err := template.New(page).Funcs(functions).ParseFiles("./ui/html/base.tmpl")
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		ts, err = ts.ParseGlob("./ui/html/partials/*.tmpl")
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+
+		ts, err = ts.ParseFiles(fmt.Sprintf("./ui/html/pages/%s", page))
+		if err != nil {
+			a.serverError(w, err)
+			return
+		}
+	} else {
+		temp, ok := a.templateCache[page]
+		if !ok {
+			err := fmt.Errorf("the template %s does not exist", page)
+			a.serverError(w, err)
+			return
+		}
+		ts = temp
 	}
 
 	buf := new(bytes.Buffer)
