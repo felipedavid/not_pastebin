@@ -29,7 +29,7 @@ func (a *app) notFound(w http.ResponseWriter) {
 // render gets the template from the template cache, executes it, and write the result to the client
 func (a *app) render(w http.ResponseWriter, status int, page string, data *templateData) {
 	// if the application is in debug mode, don't use the template cache
-	var ts *template.Template
+	var temp *template.Template
 	if a.debugMode {
 		ts, err := template.New(page).Funcs(functions).ParseFiles("./ui/html/base.tmpl")
 		if err != nil {
@@ -48,19 +48,20 @@ func (a *app) render(w http.ResponseWriter, status int, page string, data *templ
 			a.serverError(w, err)
 			return
 		}
+		temp = ts
 	} else {
-		temp, ok := a.templateCache[page]
+		ts, ok := a.templateCache[page]
 		if !ok {
 			err := fmt.Errorf("the template %s does not exist", page)
 			a.serverError(w, err)
 			return
 		}
-		ts = temp
+		temp = ts
 	}
 
 	buf := new(bytes.Buffer)
 
-	err := ts.ExecuteTemplate(buf, "base", data)
+	err := temp.ExecuteTemplate(buf, "base", data)
 	if err != nil {
 		a.serverError(w, err)
 		return
