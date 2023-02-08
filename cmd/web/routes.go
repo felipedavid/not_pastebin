@@ -22,6 +22,7 @@ func (a *app) routes() http.Handler {
 	mux.Handle("/user/info/", a.loadAndSave(a.authenticate(a.requireAuthentication(http.HandlerFunc(a.userInfo)))))
 	mux.Handle("/user/changepassword",
 		a.loadAndSave(a.authenticate(a.requireAuthentication(http.HandlerFunc(a.changePassword)))))
+	mux.HandleFunc("/ping", a.ping)
 
 	return a.recoverPanic(a.logRequest(secureHeaders(mux)))
 }

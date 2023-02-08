@@ -378,3 +378,7 @@ func (a *app) changePassword(w http.ResponseWriter, r *http.Request) {
 		a.clientError(w, http.StatusMethodNotAllowed)
 	}
 }
+
+func (a *app) ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
