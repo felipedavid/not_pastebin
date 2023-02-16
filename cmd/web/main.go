@@ -28,7 +28,7 @@ type app struct {
 
 func main() {
 	/* Pasing command line flags */
-	addr := flag.String("addr", "127.0.0.1:8000", "HTTP network address")
+	addr := flag.String("addr", "127.0.0.1:443", "HTTP network address")
 	dsn := flag.String("dsn",
 		"postgres://postgres:postgres@localhost/not_pastebin?sslmode=disable",
 		"Domain service name")
@@ -84,6 +84,8 @@ func main() {
 	tlsConfig := &tls.Config{
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
+
+	go http.ListenAndServe("127.0.0.1:80", http.HandlerFunc(a.upgradeHttpRequest))
 
 	s := http.Server{
 		Addr:         *addr,

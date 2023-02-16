@@ -11,6 +11,15 @@ import (
 	"github.com/felipedavid/not_pastebin/internal/validator"
 )
 
+func (a *app) upgradeHttpRequest(w http.ResponseWriter, r *http.Request) {
+	target := "https://" + r.Host + r.URL.Path
+	if len(r.URL.RawQuery) > 0 {
+		target += "?" + r.URL.RawQuery
+	}
+	a.infoLogger.Printf("redirect to: %s", target)
+	http.Redirect(w, r, target, http.StatusTemporaryRedirect)
+}
+
 func (a *app) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		a.notFound(w)
