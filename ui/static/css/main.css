@@ -1,4 +1,5 @@
 @import '../fonts/Montserrat-Regular.ttf';
+@import '../fonts/Cascadia-Code.ttf';
 
 * {
     font-family: "Cascadia Code", "Montserrat", sans-serif;
