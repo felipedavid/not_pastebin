@@ -3,12 +3,12 @@
 {{define "main"}}
     {{with .Snippet}}
     <div class="snippet">
-        <div class="metadata">
+        <div class="metadata" id="snippet_title">
             <strong>{{.Title}}</strong>
             <strong>#{{.ID}}</strong>
         </div>
         <pre><code>{{.Content}}</code></pre>
-        <div class="metadata">
+        <div class="metadata" id="snippet_dates">
             <time>Created: {{humanDate .Created}}</time>
             <time>Expires: {{humanDate .Expires}}</time>
         </div>

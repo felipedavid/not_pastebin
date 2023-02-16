@@ -7,7 +7,7 @@
             <label class="error">{{.}}</label>
         {{end}}
         <label>Title:</label>
-        <input type="text" name="title" value="{{.Form.Title}}">
+        <input type="text" name="title" value="{{.Form.Title}}" class="text_input">
     </div>
     <div>
         {{with .Form.FieldErrors.content}}
@@ -26,7 +26,7 @@
         <input type="radio" name="expires" value="1" {{if (eq .Form.Expires 1)}}checked{{end}}> One Day
     </div>
     <div>
-        <input type="submit" value="Publish snippet">
+        <input type="submit" value="Publish snippet" class="button">
     </div>
 </form>
 {{end}}

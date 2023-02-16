@@ -7,15 +7,15 @@
             {{with .Form.FieldErrors.email}}
                 <label class="error">{{.}}</label>
             {{end}}
-            <input type="text" name="email">
+            <input type="text" name="email" class="text_input">
         </div>
         <div>
             <label for="password">Password:</label>
             {{with .Form.FieldErrors.password}}
                 <label class="error">{{.}}</label>
             {{end}}
-            <input type="password" name="name">
+            <input type="password" name="password" class="text_input">
         </div>
-        <input type="submit" value="Login">
+        <input type="submit" value="Login" class="button">
     </form>
 {{end}}

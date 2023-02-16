@@ -1,7 +1,7 @@
 {{define "title"}}Account{{end}}
 
 {{define "main"}}
-    <table>
+    <table id="user_info">
         <tr>
             <td>Name</td>
             <td>{{.User.Name}}</td>
@@ -12,7 +12,7 @@
         </tr>
         <tr>
             <td>Joined</td>
-            <td>{{.User.Created}}</td>
+            <td>{{humanDate .User.Created}}</td>
         </tr>
         <tr>
             <td>Password</td>
