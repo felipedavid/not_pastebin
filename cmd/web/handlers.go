@@ -6,9 +6,9 @@ import (
 	"net/http"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		errorResponse(w, r, http.StatusNotFound)
+		app.notFoundResponse(w)
 		return
 	}
 
@@ -19,26 +19,26 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		errorResponse(w, r, http.StatusInternalServerError)
+		app.serverErrorResponse(w, err)
 		return
 	}
 
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		errorResponse(w, r, http.StatusInternalServerError)
+		app.serverErrorResponse(w, err)
 	}
 }
 
-func viewSnippetHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) viewSnippetHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := getQueryInt(r, "id")
 	if err != nil {
-		errorResponse(w, r, http.StatusBadRequest)
+		app.badRequestResponse(w)
 		return
 	}
 	fmt.Fprintf(w, "Viewing the snippet %d", id)
 }
 
-func createSnippetHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) createSnippetHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		w.Write([]byte("create a snippet"))
